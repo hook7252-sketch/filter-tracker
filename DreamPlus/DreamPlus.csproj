@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <AssemblyName>DreamPlus</AssemblyName>
+    <RootNamespace>DreamPlus</RootNamespace>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <LangVersion>10</LangVersion>
+    <OutputType>Library</OutputType>
+    <PlatformTarget>x64</PlatformTarget>
+    <!-- AutoCAD 설치 경로 (환경에 맞게 수정) -->
+    <AutoCadPath>C:\Program Files\Autodesk\AutoCAD 2024</AutoCadPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- AutoCAD .NET API NuGet 패키지 -->
+    <PackageReference Include="AutoCAD.NET.Core" Version="24.0.0" />
+    <PackageReference Include="AutoCAD.NET.Model" Version="24.0.0" />
+  </ItemGroup>
+
+  <!-- AutoCAD DLL이 로컬에 있을 경우 직접 참조 (NuGet 대신 사용 가능) -->
+  <!--
+  <ItemGroup>
+    <Reference Include="accoremgd">
+      <HintPath>$(AutoCadPath)\accoremgd.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="acdbmgd">
+      <HintPath>$(AutoCadPath)\acdbmgd.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="acmgd">
+      <HintPath>$(AutoCadPath)\acmgd.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  -->
+
+</Project>
