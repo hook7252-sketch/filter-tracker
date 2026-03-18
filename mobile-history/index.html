@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>거래내역 불러오기</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>거래내역 불러오기</h1>
+      <p class="subtitle">은행·간편결제 앱에서 내보낸 CSV 파일을 업로드하세요</p>
+    </header>
+
+    <!-- 업로드 영역 -->
+    <section class="upload-section" id="uploadSection">
+      <div class="drop-zone" id="dropZone">
+        <div class="drop-icon">📂</div>
+        <p>CSV 파일을 끌어다 놓거나</p>
+        <label class="btn-upload" for="fileInput">파일 선택</label>
+        <input type="file" id="fileInput" accept=".csv,.xls,.xlsx" hidden>
+        <p class="hint">
+          지원 형식: CSV<br>
+          KB국민·신한·우리·하나·카카오페이·네이버페이
+        </p>
+      </div>
+    </section>
+
+    <!-- 인코딩 선택 -->
+    <div class="encoding-row" id="encodingRow" hidden>
+      <label>인코딩:
+        <select id="encodingSelect">
+          <option value="euc-kr">EUC-KR (한국 은행 기본)</option>
+          <option value="utf-8">UTF-8</option>
+          <option value="cp949">CP949</option>
+        </select>
+      </label>
+      <button class="btn-secondary" id="reloadBtn">다시 읽기</button>
+    </div>
+
+    <!-- 필터 영역 -->
+    <section class="filter-section" id="filterSection" hidden>
+      <div class="filter-row">
+        <input type="date" id="dateFrom" title="시작일">
+        <span>~</span>
+        <input type="date" id="dateTo" title="종료일">
+        <button class="btn-secondary" id="resetDate">초기화</button>
+      </div>
+      <div class="filter-row">
+        <input type="text" id="searchText" placeholder="가맹점·적요 검색" autocomplete="off">
+        <select id="typeFilter">
+          <option value="all">전체</option>
+          <option value="debit">출금</option>
+          <option value="credit">입금</option>
+        </select>
+      </div>
+      <div class="summary" id="summary"></div>
+    </section>
+
+    <!-- 테이블 -->
+    <section class="table-section" id="tableSection" hidden>
+      <div class="table-wrapper">
+        <table id="txTable">
+          <thead>
+            <tr>
+              <th>날짜</th>
+              <th>내용</th>
+              <th class="number">출금</th>
+              <th class="number">입금</th>
+              <th class="number">잔액</th>
+            </tr>
+          </thead>
+          <tbody id="txBody"></tbody>
+        </table>
+      </div>
+      <div class="pagination" id="pagination"></div>
+    </section>
+
+    <!-- 빈 결과 -->
+    <div class="empty" id="emptyMsg" hidden>조건에 맞는 거래내역이 없습니다.</div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
