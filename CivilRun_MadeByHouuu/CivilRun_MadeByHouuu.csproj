@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>net48</TargetFramework>
-    <AssemblyName>DreamPlus</AssemblyName>
-    <RootNamespace>DreamPlus</RootNamespace>
+    <AssemblyName>CivilRun_MadeByHouuu</AssemblyName>
+    <RootNamespace>CivilRun_MadeByHouuu</RootNamespace>
     <UseWPF>true</UseWPF>
     <Nullable>enable</Nullable>
     <LangVersion>10</LangVersion>

@@ -2,11 +2,11 @@ using System.Windows;
 using System.Windows.Controls;
 using Autodesk.AutoCAD.ApplicationServices;
 
-namespace DreamPlus.UI
+namespace CivilRun_MadeByHouuu.UI
 {
-    public partial class DreamPlusPalette : Window
+    public partial class CivilRun_MadeByHouuuPalette : Window
     {
-        public DreamPlusPalette()
+        public CivilRun_MadeByHouuuPalette()
         {
             InitializeComponent();
         }

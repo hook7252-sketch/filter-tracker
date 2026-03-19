@@ -1,4 +1,4 @@
-# DreamPlus AutoCAD Plugin
+# CivilRun_MadeByHouuu AutoCAD Plugin
 
 AutoCAD용 생산성 향상 플러그인입니다. 드림플러스처럼 자주 쓰는 작업을 빠르게 실행할 수 있습니다.
 
@@ -11,13 +11,13 @@ AutoCAD용 생산성 향상 플러그인입니다. 드림플러스처럼 자주 
 ### 빌드
 
 ```bash
-cd DreamPlus
+cd CivilRun_MadeByHouuu
 dotnet build -c Release
 ```
 
-또는 Visual Studio에서 `DreamPlus.csproj`를 열고 빌드합니다.
+또는 Visual Studio에서 `CivilRun_MadeByHouuu.csproj`를 열고 빌드합니다.
 
-> **참고**: AutoCAD가 설치된 환경에서는 `DreamPlus.csproj`의 주석 처리된
+> **참고**: AutoCAD가 설치된 환경에서는 `CivilRun_MadeByHouuu.csproj`의 주석 처리된
 > `<Reference>` 블록을 활성화하고 NuGet 패키지를 제거해도 됩니다.
 
 ---
@@ -30,7 +30,7 @@ AutoCAD 명령창에서:
 NETLOAD
 ```
 
-→ 빌드된 `DreamPlus.dll`을 선택합니다.
+→ 빌드된 `CivilRun_MadeByHouuu.dll`을 선택합니다.
 
 매번 수동 로드가 번거로울 경우 `acadappobj` 또는 `APPLOAD` 시작 스위트에 등록하거나,
 `startup.lsp`를 사용하세요.
@@ -91,9 +91,9 @@ DP
 ## 프로젝트 구조
 
 ```
-DreamPlus/
-├── DreamPlus.csproj
-├── DreamPlusApp.cs          # 플러그인 진입점 (IExtensionApplication)
+CivilRun_MadeByHouuu/
+├── CivilRun_MadeByHouuu.csproj
+├── CivilRun_MadeByHouuuApp.cs          # 플러그인 진입점 (IExtensionApplication)
 ├── Commands/
 │   ├── PaletteCommands.cs   # DP 팔레트 토글
 │   ├── LayerCommands.cs     # 레이어 관련 명령
@@ -103,6 +103,6 @@ DreamPlus/
 ├── Helpers/
 │   └── LayerHelper.cs       # 공통 유틸리티
 └── UI/
-    ├── DreamPlusPalette.xaml    # WPF 팔레트 UI
-    └── DreamPlusPalette.xaml.cs
+    ├── CivilRun_MadeByHouuuPalette.xaml    # WPF 팔레트 UI
+    └── CivilRun_MadeByHouuuPalette.xaml.cs
 ```

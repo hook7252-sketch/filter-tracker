@@ -7,7 +7,7 @@ using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.PlottingServices;
 using Autodesk.AutoCAD.Runtime;
 
-namespace DreamPlus.Commands
+namespace CivilRun_MadeByHouuu.Commands
 {
     public class ExportCommands
     {
@@ -73,7 +73,7 @@ namespace DreamPlus.Commands
                 using (var engine = PlotFactory.CreatePublishEngine())
                 {
                     var prog = new PlotProgressDialog(false);
-                    prog.set_PlotMsgString(PlotMessageIndex.DialogTitle, "DreamPlus PDF 출력");
+                    prog.set_PlotMsgString(PlotMessageIndex.DialogTitle, "CivilRun_MadeByHouuu PDF 출력");
                     prog.IsVisible = false;
 
                     engine.BeginPlot(prog, null);
