@@ -688,8 +688,7 @@ namespace CivilRun_MadeByHouuu.Commands
             {
                 if (tr.GetObject(so.ObjectId, OpenMode.ForWrite) is Dimension dim)
                 {
-                    var dsr = dim.GetDimVarContainer();
-                    dsr.Dimscale = scaleRes.Value;
+                    dim.Dimscale = scaleRes.Value;
                     dim.RecomputeDimensionBlock(true);
                     count++;
                 }

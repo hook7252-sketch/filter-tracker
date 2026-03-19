@@ -449,8 +449,8 @@ namespace CivilRun_MadeByHouuu.Commands
                 // 가장 가까운 폴리라인에서 Z 보간
                 var filter = new SelectionFilter(new[] { new TypedValue((int)DxfCode.Start, "LWPOLYLINE,POLYLINE") });
                 var nearRes = ed.SelectCrossingWindow(
-                    ptRes.Value - new Vector3d(0.1, 0.1, 0),
-                    ptRes.Value + new Vector3d(0.1, 0.1, 0), filter);
+                    new Point3d(ptRes.Value.X - 0.1, ptRes.Value.Y - 0.1, ptRes.Value.Z),
+                    new Point3d(ptRes.Value.X + 0.1, ptRes.Value.Y + 0.1, ptRes.Value.Z), filter);
 
                 if (nearRes.Status == PromptStatus.OK && nearRes.Value.Count > 0)
                 {
@@ -494,7 +494,7 @@ namespace CivilRun_MadeByHouuu.Commands
             double A = aRes.Value;
             double L = lRes.Value;
             int n = 100;
-            var pts = new Point2dCollection();
+            var pts = new Point3dCollection();
 
             for (int i = 0; i <= n; i++)
             {
@@ -523,7 +523,7 @@ namespace CivilRun_MadeByHouuu.Commands
                     for (int j = 0; j < k; j++) pow2 *= 2 * A * A;
                     y += sign * num / (den * pow2 * (2 * k + 2));
                 }
-                pts.Add(new Point2d(ptRes.Value.X + x, ptRes.Value.Y + y));
+                pts.Add(new Point3d(ptRes.Value.X + x, ptRes.Value.Y + y, 0));
             }
 
             using var tr = db.TransactionManager.StartTransaction();
@@ -579,13 +579,13 @@ namespace CivilRun_MadeByHouuu.Commands
             double r = L / (g2 - g1);
 
             var vpi = vpRes.Value;
-            var pts = new Point2dCollection();
+            var pts = new Point3dCollection();
             int n = 50;
             for (int i = 0; i <= n; i++)
             {
                 double x = -L / 2 + L * i / n;
                 double y = vpi.Y + g1 * x + (g2 - g1) * x * x / (2 * L);
-                pts.Add(new Point2d(vpi.X + x, y));
+                pts.Add(new Point3d(vpi.X + x, y, 0));
             }
 
             using var tr = db.TransactionManager.StartTransaction();

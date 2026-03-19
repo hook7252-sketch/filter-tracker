@@ -43,9 +43,12 @@ namespace CivilRun_MadeByHouuu.Commands
                 if (layout.LayoutName != "Model") layouts.Add(layout);
             }
 
-            if (layouts.Count == 0) layouts.Add((Layout)tr.GetObject(db.CurrentLayoutId, OpenMode.ForRead));
+            if (layouts.Count == 0)
+            {
+                var lm = LayoutManager.Current;
+                layouts.Add((Layout)tr.GetObject(lm.GetLayoutId(lm.CurrentLayout), OpenMode.ForRead));
+            }
 
-            var pm = PlotManager.GetPlotManager(doc);
             int plotted = 0;
 
             foreach (var layout in layouts)
