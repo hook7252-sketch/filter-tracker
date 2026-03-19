@@ -202,7 +202,7 @@ namespace CivilRun_MadeByHouuu.Commands
             }
 
             var first = GetPos(items[0]);
-            var last = GetPos(items[^1]);
+            var last = GetPos(items[items.Count - 1]);
             int n = items.Count;
             for (int i = 1; i < n - 1; i++)
             {
@@ -663,7 +663,7 @@ namespace CivilRun_MadeByHouuu.Commands
             foreach (SelectedObject so in selRes.Value)
             {
                 if (tr.GetObject(so.ObjectId, OpenMode.ForWrite) is Dimension dim)
-                { dim.DimensionStyleId = styleId; count++; }
+                { dim.DimStyleId = styleId; count++; }
             }
             tr.Commit();
             ed.WriteMessage($"\n{count}개 치수 스타일 변경 완료.");
@@ -758,8 +758,8 @@ namespace CivilRun_MadeByHouuu.Commands
             foreach (SelectedObject so in selRes.Value)
             {
                 if (tr.GetObject(so.ObjectId, OpenMode.ForWrite) is Dimension dim
-                    && dim.DimensionStyleId == fromId)
-                { dim.DimensionStyleId = toId; count++; }
+                    && dim.DimStyleId == fromId)
+                { dim.DimStyleId = toId; count++; }
             }
             tr.Commit();
             ed.WriteMessage($"\n{count}개 치수 스타일을 병합했습니다.");

@@ -526,7 +526,7 @@ namespace CivilRun_MadeByHouuu.Commands
             if (lsm.HasLayerState(nameRes.StringResult))
                 lsm.DeleteLayerState(nameRes.StringResult);
             lsm.SaveLayerState(nameRes.StringResult,
-                LayerStateMasks.Color | LayerStateMasks.Frozen | LayerStateMasks.Hidden |
+                LayerStateMasks.Color | LayerStateMasks.Frozen | LayerStateMasks.Off |
                 LayerStateMasks.Locked | LayerStateMasks.Plot, ObjectId.Null);
             ed.WriteMessage($"\n레이어 상태 '{nameRes.StringResult}'을 저장했습니다.");
         }
@@ -545,7 +545,7 @@ namespace CivilRun_MadeByHouuu.Commands
             { ed.WriteMessage($"\n'{nameRes.StringResult}' 레이어 상태가 없습니다."); return; }
 
             lsm.RestoreLayerState(nameRes.StringResult, ObjectId.Null,
-                LayerStateMasks.Color | LayerStateMasks.Frozen | LayerStateMasks.Hidden |
+                LayerStateMasks.Color | LayerStateMasks.Frozen | LayerStateMasks.Off |
                 LayerStateMasks.Locked | LayerStateMasks.Plot);
             ed.WriteMessage($"\n레이어 상태 '{nameRes.StringResult}'을 복원했습니다.");
         }

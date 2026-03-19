@@ -72,13 +72,14 @@ namespace CivilRun_MadeByHouuu.Commands
 
                 using (var engine = PlotFactory.CreatePublishEngine())
                 {
-                    var prog = new PlotProgressDialog(false);
+                    var prog = new PlotProgressDialog(false, 1, false);
                     prog.set_PlotMsgString(PlotMessageIndex.DialogTitle, "CivilRun_MadeByHouuu PDF 출력");
                     prog.IsVisible = false;
 
                     engine.BeginPlot(prog, null);
                     engine.BeginDocument(pi, doc.Name, null, 1, true, pdfPath);
-                    engine.BeginPage(pi, prog, true, null);
+                    var ppi = new PlotPageInfo();
+                    engine.BeginPage(ppi, prog, true, null);
                     engine.BeginGenerateGraphics(null);
                     engine.EndGenerateGraphics(null);
                     engine.EndPage(null);
