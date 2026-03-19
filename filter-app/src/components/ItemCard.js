@@ -2,14 +2,14 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { getStatus, getNextDate, formatDate, daysUntil, statusColor, statusLabel } from '../utils/dateUtils';
 
-export default function ItemCard({ item, onPress }) {
+export default function ItemCard({ item, onPress, onLongPress }) {
   const status = getStatus(item);
   const nextDate = getNextDate(item);
   const days = nextDate ? daysUntil(nextDate) : null;
   const color = statusColor(status);
 
   return (
-    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.7}>
+    <TouchableOpacity style={styles.card} onPress={onPress} onLongPress={onLongPress} activeOpacity={0.7} delayLongPress={400}>
       <View style={styles.left}>
         <View style={[styles.statusDot, { backgroundColor: color }]} />
       </View>

@@ -1,10 +1,10 @@
 import React, { useState, useCallback } from 'react';
 import {
   View, Text, SectionList, TouchableOpacity,
-  StyleSheet, StatusBar, RefreshControl,
+  StyleSheet, StatusBar, Alert,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { loadItems } from '../utils/storage';
+import { loadItems, saveItems } from '../utils/storage';
 import { CATEGORIES } from '../data/initialData';
 import { getStatus, statusColor } from '../utils/dateUtils';
 import ItemCard from '../components/ItemCard';
@@ -13,28 +13,57 @@ export default function HomeScreen({ navigation }) {
   const [sections, setSections] = useState([]);
   const [summary, setSummary] = useState({ overdue: 0, soon: 0, total: 0 });
 
-  useFocusEffect(
-    useCallback(() => {
-      loadItems().then(items => {
-        // Group by category preserving order
-        const grouped = {};
-        CATEGORIES.forEach(cat => { grouped[cat] = []; });
-        items.forEach(item => {
-          const cat = item.category || '기타';
-          if (!grouped[cat]) grouped[cat] = [];
-          grouped[cat].push(item);
-        });
-        const secs = Object.entries(grouped)
-          .filter(([, data]) => data.length > 0)
-          .map(([title, data]) => ({ title, data }));
-        setSections(secs);
-
-        const overdue = items.filter(i => getStatus(i) === 'overdue').length;
-        const soon = items.filter(i => getStatus(i) === 'soon').length;
-        setSummary({ overdue, soon, total: items.length });
+  const refresh = useCallback(() => {
+    loadItems().then(items => {
+      const grouped = {};
+      CATEGORIES.forEach(cat => { grouped[cat] = []; });
+      items.forEach(item => {
+        const cat = item.category || '기타';
+        if (!grouped[cat]) grouped[cat] = [];
+        grouped[cat].push(item);
       });
-    }, [])
-  );
+      const secs = Object.entries(grouped)
+        .filter(([, data]) => data.length > 0)
+        .map(([title, data]) => ({ title, data }));
+      setSections(secs);
+
+      const overdue = items.filter(i => getStatus(i) === 'overdue').length;
+      const soon = items.filter(i => getStatus(i) === 'soon').length;
+      setSummary({ overdue, soon, total: items.length });
+    });
+  }, []);
+
+  useFocusEffect(refresh);
+
+  const handleLongPress = (item) => {
+    Alert.alert(item.name, '어떤 작업을 하시겠어요?', [
+      {
+        text: '✏️  수정',
+        onPress: () => navigation.navigate('Edit', { itemId: item.id }),
+      },
+      {
+        text: '🗑️  삭제',
+        style: 'destructive',
+        onPress: () => confirmDelete(item),
+      },
+      { text: '취소', style: 'cancel' },
+    ]);
+  };
+
+  const confirmDelete = (item) => {
+    Alert.alert('삭제 확인', `"${item.name}"을(를) 삭제할까요?`, [
+      { text: '취소', style: 'cancel' },
+      {
+        text: '삭제',
+        style: 'destructive',
+        onPress: async () => {
+          const items = await loadItems();
+          await saveItems(items.filter(i => i.id !== item.id));
+          refresh();
+        },
+      },
+    ]);
+  };
 
   const renderSectionHeader = ({ section: { title, data } }) => {
     const overdueCount = data.filter(i => getStatus(i) === 'overdue').length;
@@ -54,7 +83,6 @@ export default function HomeScreen({ navigation }) {
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#F2F2F7" />
 
-      {/* Summary banner */}
       {(summary.overdue > 0 || summary.soon > 0) && (
         <View style={styles.banner}>
           {summary.overdue > 0 && (
@@ -80,28 +108,33 @@ export default function HomeScreen({ navigation }) {
           <ItemCard
             item={item}
             onPress={() => navigation.navigate('Detail', { itemId: item.id })}
+            onLongPress={() => handleLongPress(item)}
           />
         )}
         contentContainerStyle={styles.list}
-        staggerAnimation
+        ListEmptyComponent={
+          <View style={styles.empty}>
+            <Text style={styles.emptyText}>소모품이 없습니다.</Text>
+            <Text style={styles.emptyHint}>아래 + 버튼으로 추가해보세요.</Text>
+          </View>
+        }
       />
 
+      {/* FAB */}
       <TouchableOpacity
         style={styles.fab}
         onPress={() => navigation.navigate('Edit', { itemId: null })}
         activeOpacity={0.85}
       >
-        <Text style={styles.fabIcon}>+</Text>
+        <Text style={styles.fabIcon}>＋</Text>
+        <Text style={styles.fabLabel}>제품 추가</Text>
       </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F2F2F7',
-  },
+  container: { flex: 1, backgroundColor: '#F2F2F7' },
   banner: {
     flexDirection: 'row',
     paddingHorizontal: 16,
@@ -116,14 +149,8 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     gap: 6,
   },
-  bannerNum: {
-    fontSize: 20,
-    fontWeight: '700',
-  },
-  bannerLabel: {
-    fontSize: 13,
-    color: '#3C3C43',
-  },
+  bannerNum: { fontSize: 20, fontWeight: '700' },
+  bannerLabel: { fontSize: 13, color: '#3C3C43' },
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -131,11 +158,7 @@ const styles = StyleSheet.create({
     paddingTop: 18,
     paddingBottom: 6,
   },
-  sectionTitle: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: '#1C1C1E',
-  },
+  sectionTitle: { fontSize: 17, fontWeight: '700', color: '#1C1C1E' },
   sectionBadge: {
     marginLeft: 8,
     backgroundColor: '#FF3B3020',
@@ -143,33 +166,31 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 2,
   },
-  sectionBadgeText: {
-    fontSize: 11,
-    color: '#FF3B30',
-    fontWeight: '600',
+  sectionBadgeText: { fontSize: 11, color: '#FF3B30', fontWeight: '600' },
+  list: { paddingBottom: 110 },
+  empty: {
+    alignItems: 'center',
+    marginTop: 80,
   },
-  list: {
-    paddingBottom: 100,
-  },
+  emptyText: { fontSize: 17, fontWeight: '600', color: '#8E8E93' },
+  emptyHint: { fontSize: 13, color: '#C7C7CC', marginTop: 6 },
   fab: {
     position: 'absolute',
     bottom: 30,
-    right: 24,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: '#007AFF',
-    justifyContent: 'center',
+    right: 20,
+    flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: '#007AFF',
+    borderRadius: 28,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    gap: 6,
     shadowColor: '#007AFF',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.4,
     shadowRadius: 8,
     elevation: 6,
   },
-  fabIcon: {
-    fontSize: 28,
-    color: '#fff',
-    lineHeight: 32,
-  },
+  fabIcon: { fontSize: 20, color: '#fff', lineHeight: 24 },
+  fabLabel: { fontSize: 15, color: '#fff', fontWeight: '700' },
 });
