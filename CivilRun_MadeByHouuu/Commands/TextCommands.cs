@@ -663,7 +663,11 @@ namespace CivilRun_MadeByHouuu.Commands
             foreach (SelectedObject so in selRes.Value)
             {
                 if (tr.GetObject(so.ObjectId, OpenMode.ForWrite) is Dimension dim)
-                { dim.DimStyleId = styleId; count++; }
+                {
+                    var rec = (DimStyleTableRecord)tr.GetObject(styleId, OpenMode.ForRead);
+                    dim.SetDimstyleData(rec);
+                    count++;
+                }
             }
             tr.Commit();
             ed.WriteMessage($"\n{count}개 치수 스타일 변경 완료.");
@@ -753,12 +757,14 @@ namespace CivilRun_MadeByHouuu.Commands
             var selRes = ed.SelectAll(filter);
             if (selRes.Status != PromptStatus.OK) { tr.Commit(); return; }
 
+            var fromRec = (DimStyleTableRecord)tr.GetObject(fromId, OpenMode.ForRead);
+            var toRec = (DimStyleTableRecord)tr.GetObject(toId, OpenMode.ForRead);
             int count = 0;
             foreach (SelectedObject so in selRes.Value)
             {
                 if (tr.GetObject(so.ObjectId, OpenMode.ForWrite) is Dimension dim
-                    && dim.DimStyleId == fromId)
-                { dim.DimStyleId = toId; count++; }
+                    && dim.DimensionStyleName == fromRec.Name)
+                { dim.SetDimstyleData(toRec); count++; }
             }
             tr.Commit();
             ed.WriteMessage($"\n{count}개 치수 스타일을 병합했습니다.");

@@ -255,8 +255,8 @@ namespace CivilRun_MadeByHouuu.Commands
                 Point3d centroid = Point3d.Origin;
                 var obj = tr.GetObject(so.ObjectId, OpenMode.ForRead);
 
-                if (obj is Polyline pl) { area = pl.Area; centroid = pl.GeometricExtents.MaxPoint.Subtract(pl.GeometricExtents.MinPoint).DivideBy(2).Add(pl.GeometricExtents.MinPoint.GetAsVector()); }
-                else if (obj is Hatch ht) { area = ht.Area; centroid = ht.GeometricExtents.MaxPoint.Add(ht.GeometricExtents.MinPoint.GetAsVector()).DivideBy(2.0); }
+                if (obj is Polyline pl) { area = pl.Area; centroid = new Point3d((pl.GeometricExtents.MinPoint.X + pl.GeometricExtents.MaxPoint.X) / 2, (pl.GeometricExtents.MinPoint.Y + pl.GeometricExtents.MaxPoint.Y) / 2, 0); }
+                else if (obj is Hatch ht) { area = ht.Area; centroid = new Point3d((ht.GeometricExtents.MinPoint.X + ht.GeometricExtents.MaxPoint.X) / 2, (ht.GeometricExtents.MinPoint.Y + ht.GeometricExtents.MaxPoint.Y) / 2, 0); }
                 else if (obj is Circle cl) { area = cl.Area; centroid = cl.Center; }
 
                 var text = new DBText
