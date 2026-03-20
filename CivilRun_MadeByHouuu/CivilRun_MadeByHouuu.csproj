@@ -19,18 +19,6 @@
     <PackageReference Include="AutoCAD.NET.Model" Version="24.0.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <!-- 메뉴/UI API (PopupMenu, MenuGroup 등) -->
-    <Reference Include="acmgd">
-      <HintPath>$(AutoCadPath)\acmgd.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="AdWindows">
-      <HintPath>$(AutoCadPath)\AdWindows.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-  </ItemGroup>
-
   <!-- AutoCAD DLL이 로컬에 있을 경우 직접 참조 (NuGet 대신 사용 가능) -->
   <!--
   <ItemGroup>
