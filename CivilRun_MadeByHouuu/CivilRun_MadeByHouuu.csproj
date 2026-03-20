@@ -19,6 +19,14 @@
     <PackageReference Include="AutoCAD.NET.Model" Version="24.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- 리본 UI를 위한 AdWindows 참조 -->
+    <Reference Include="AdWindows">
+      <HintPath>$(AutoCadPath)\AdWindows.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+
   <!-- AutoCAD DLL이 로컬에 있을 경우 직접 참조 (NuGet 대신 사용 가능) -->
   <!--
   <ItemGroup>
