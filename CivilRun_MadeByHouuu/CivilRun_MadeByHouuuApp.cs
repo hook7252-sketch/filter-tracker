@@ -14,6 +14,10 @@ namespace CivilRun_MadeByHouuu
             var doc = Application.DocumentManager.MdiActiveDocument;
             doc?.Editor.WriteMessage("\n[CivilRun] 플러그인 로드 완료. 상단 리본에서 'CivilRun' 탭을 확인하세요.\n");
 
+            // 리본이 숨겨져 있으면 강제로 켜기
+            Application.DocumentManager.MdiActiveDocument?
+                .SendStringToExecute("RIBBON\n", true, false, false);
+
             // 리본이 이미 준비된 경우 즉시 등록, 아니면 이벤트 대기
             if (ComponentManager.Ribbon != null)
                 RibbonLoader.CreateRibbon();
