@@ -217,7 +217,7 @@ namespace CivilRun_MadeByHouuu.Commands
             if (psr.Status != PromptStatus.OK) return;
 
             ObjectId templateCircleId = ObjectId.Null, templateTextId = ObjectId.Null;
-            Vector3d offset   = Vector3d.Zero;
+            Vector3d offset   = new Vector3d(0, 0, 0);
             int baseNumber    = 0;
             bool isMText      = false, isDBTextAligned = false;
 
