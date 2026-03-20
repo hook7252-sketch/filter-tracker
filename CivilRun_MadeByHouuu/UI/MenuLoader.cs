@@ -141,7 +141,7 @@ namespace CivilRun_MadeByHouuu.UI
 
         // menu: PopupMenu 변수명에 직접 addmenuitem
         private static void Item(StringBuilder sb, string menu, string label, string cmd) =>
-            sb.AppendLine($"    (vla-addmenuitem {menu} (vla-get-count {menu}) \"{label}\" \"^C^C(command \\\"{cmd}\\\")\")");
+            sb.AppendLine($"    (vla-addmenuitem {menu} (vla-get-count {menu}) \"{label}\" \"(command \\\"{cmd}\\\")\")");
 
         private static void Sep(StringBuilder sb, string menu) =>
             sb.AppendLine($"    (vla-addseparator {menu} (vla-get-count {menu}))");
