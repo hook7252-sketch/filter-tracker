@@ -53,6 +53,7 @@ namespace CivilRun_MadeByHouuu.UI
             Item(sb, "s1", "좌표 내보내기 (CSV)",     "DP_COORDEXP");
             Item(sb, "s1", "좌표 가져오기 (CSV)",     "DP_COORDIMP");
             Sep(sb,  "s1");
+            Item(sb, "s1", "XY 좌표 지시선",          "DP_XY");
             Item(sb, "s1", "거리/방위각 계산",        "DP_DISTAZ");
             Item(sb, "s1", "방위각으로 선 그리기",    "DP_AZLINE");
             Item(sb, "s1", "세그먼트 길이 표시",      "DP_SEGLEN");
@@ -62,6 +63,7 @@ namespace CivilRun_MadeByHouuu.UI
             // ─ 면적/토량
             Sub(sb, "root", "s2", "면적/토량");
             Item(sb, "s2", "면적 표시",               "DP_AREATEXT");
+            Item(sb, "s2", "면적 지시선 (ARL)",        "DP_ARL");
             Item(sb, "s2", "면적 합산",               "DP_AREASUM");
             Item(sb, "s2", "토량 계산 (양단면/각주)", "DP_EARTHWORK");
 
@@ -80,10 +82,19 @@ namespace CivilRun_MadeByHouuu.UI
             Item(sb, "s4", "레이어 생성",             "DP_LAYER_NEW");
             Item(sb, "s4", "레이어 목록",             "DP_LAYER_LIST");
             Sep(sb,  "s4");
-            Item(sb, "s4", "레이어 끄기",             "DP_LOF");
+            Item(sb, "s4", "레이어 끄기 (기본)",      "DP_LOF");
             Item(sb, "s4", "레이어 켜기 (전체)",      "DP_LON");
             Item(sb, "s4", "레이어 분리",             "DP_LISO");
             Item(sb, "s4", "레이어 분리 해제",        "DP_LUISO");
+            Sep(sb,  "s4");
+            Item(sb, "s4", "임시 OFF [TLOF]",          "DP_TLOF");
+            Item(sb, "s4", "영구 OFF [PLOFF]",         "DP_PLOFF");
+            Item(sb, "s4", "임시 OFF 복구 [TLON]",     "DP_TLON");
+            Item(sb, "s4", "강제 전체 복구 [PLON]",    "DP_PLON");
+            Item(sb, "s4", "선택 레이어만 ON [LOL]",   "DP_LOL");
+            Sep(sb,  "s4");
+            Item(sb, "s4", "VP 레이어 오버라이드 해제","DP_LONVP");
+            Item(sb, "s4", "전체 레이아웃 레이어 ON",  "DP_LONALL");
             Sep(sb,  "s4");
             Item(sb, "s4", "레이어 잠금",             "DP_LLK");
             Item(sb, "s4", "레이어 잠금 해제 (전체)", "DP_LULK");
@@ -111,9 +122,30 @@ namespace CivilRun_MadeByHouuu.UI
             Item(sb, "s5", "숫자 증감",               "DP_TINC");
             Item(sb, "s5", "대소문자 변환",           "DP_TCASE");
             Sep(sb,  "s5");
+            Item(sb, "s5", "폰트 일괄 변경 (malgun)", "DP_FC");
+            Item(sb, "s5", "문자 아래로 복제 (WCS)",  "DP_RB");
+            Item(sb, "s5", "문자 위로 복제 (WCS)",    "DP_RU");
+            Item(sb, "s5", "문자 아래로 복제 (화면)", "DP_RBS");
+            Item(sb, "s5", "문자 위로 복제 (화면)",   "DP_RUS");
+            Item(sb, "s5", "문자 아래로 복제 (UCS)",  "DP_RBU");
+            Item(sb, "s5", "문자 위로 복제 (UCS)",    "DP_RUU");
+            Sep(sb,  "s5");
             Item(sb, "s5", "치수 축척 변경",          "DP_DIM_SCALE");
             Item(sb, "s5", "치수 스타일 변경",        "DP_DIM_STYLE");
             Item(sb, "s5", "치수 레이어 이동",        "DP_DIM_LAYER");
+
+            // ─ 블록/도구
+            Sub(sb, "root", "s6b", "블록/도구");
+            Item(sb, "s6b", "블록 삽입",               "DP_BLOCK_INSERT");
+            Item(sb, "s6b", "블록 목록",               "DP_BLOCK_LIST");
+            Item(sb, "s6b", "블록 개수 세기",          "DP_BLOCK_COUNT");
+            Item(sb, "s6b", "블록 교체",               "DP_BLOCK_REPLACE");
+            Sep(sb,   "s6b");
+            Item(sb, "s6b", "원+번호 연속 복제 [CU]",  "DP_CU");
+            Item(sb, "s6b", "XY 비균일 스케일 [XYB]",  "DP_XYB");
+            Sep(sb,   "s6b");
+            Item(sb, "s6b", "변경있음 배지 [BY]",       "DP_BY");
+            Item(sb, "s6b", "변경없음 배지 [BN]",       "DP_BN");
 
             // ─ 출력/내보내기
             Sub(sb, "root", "s6", "출력/내보내기");

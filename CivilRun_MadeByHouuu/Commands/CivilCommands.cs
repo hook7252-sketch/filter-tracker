@@ -756,5 +756,152 @@ namespace CivilRun_MadeByHouuu.Commands
             ed.WriteMessage($"\n  각주공식      : {v_pri:F3} m³");
             ed.WriteMessage($"\n───────────────────");
         }
+
+        // ══════════════════════════════════════════════
+        //  좌표 지시선 / 면적 지시선
+        // ══════════════════════════════════════════════
+
+        /// <summary>XY 좌표 지시선 — 화살표+꺾임+X/Y 문자 자동 배치</summary>
+        [CommandMethod("DP_XY")]
+        public void XY()
+        {
+            var doc = Application.DocumentManager.MdiActiveDocument;
+            var db  = doc.Database; var ed = doc.Editor;
+
+            var a = ed.GetPoint("\n좌표(지시선 화살표) 위치 선택: ");
+            if (a.Status != PromptStatus.OK) return;
+
+            var p2o = new PromptPointOptions("\n문자(지시선 꺾이는) 위치 선택: ")
+                { BasePoint = a.Value, UseBasePoint = true };
+            var b = ed.GetPoint(p2o);
+            if (b.Status != PromptStatus.OK) return;
+
+            var ucs   = ed.CurrentUserCoordinateSystem;
+            var ucsPt = a.Value.TransformBy(ucs.Inverse());
+
+            string textX = $"X={ucsPt.X:0.0000}";
+            string textY = $"Y={ucsPt.Y:0.0000}";
+
+            using var tr = db.TransactionManager.StartTransaction();
+            var space = (BlockTableRecord)tr.GetObject(db.CurrentSpaceId, OpenMode.ForWrite);
+
+            double h   = Application.GetSystemVariable("TEXTSIZE") is double ts && ts > 0.1 ? ts : 2.5;
+            double scl = db.Cannoscale.Scale; if (scl <= 0) scl = 1.0;
+            double realH = h * scl;
+
+            var mtX = new MText { Contents = textX, TextHeight = realH, TextStyleId = db.Textstyle };
+            var mtY = new MText { Contents = textY, TextHeight = realH, TextStyleId = db.Textstyle };
+            space.AppendEntity(mtX); tr.AddNewlyCreatedDBObject(mtX, true);
+            space.AppendEntity(mtY); tr.AddNewlyCreatedDBObject(mtY, true);
+
+            double xW = 0, yW = 0;
+            try { xW = Math.Abs(mtX.GeometricExtents.MaxPoint.X - mtX.GeometricExtents.MinPoint.X); } catch { }
+            try { yW = Math.Abs(mtY.GeometricExtents.MaxPoint.X - mtY.GeometricExtents.MinPoint.X); } catch { }
+            if (xW < realH) xW = realH * textX.Length * 0.6;
+            if (yW < realH) yW = realH * textY.Length * 0.6;
+
+            double landLen = Math.Max(xW, yW);
+            var xAx  = ed.CurrentUserCoordinateSystem.CoordinateSystem3d.Xaxis.GetNormal();
+            var yAx  = ed.CurrentUserCoordinateSystem.CoordinateSystem3d.Yaxis.GetNormal();
+            double dx = (b.Value - a.Value).DotProduct(xAx);
+            var elbow = b.Value;
+            var gap   = yAx * (realH * 0.1);
+
+            Point3d landEnd;
+            if (dx >= 0)
+            {
+                landEnd = elbow + xAx * landLen;
+                mtX.Attachment = AttachmentPoint.BottomLeft; mtX.Location = elbow + gap;
+                mtY.Attachment = AttachmentPoint.TopLeft;    mtY.Location = elbow - gap;
+            }
+            else
+            {
+                landEnd = elbow - xAx * landLen;
+                mtX.Attachment = AttachmentPoint.BottomRight; mtX.Location = elbow + gap;
+                mtY.Attachment = AttachmentPoint.TopRight;    mtY.Location = elbow - gap;
+            }
+
+            var ld = new Leader { HasArrowHead = true };
+            ld.Dimasz = ld.Dimasz * scl; ld.Dimgap = 0.0;
+            ld.AppendVertex(a.Value); ld.AppendVertex(elbow); ld.AppendVertex(landEnd);
+            space.AppendEntity(ld); tr.AddNewlyCreatedDBObject(ld, true);
+            tr.Commit();
+        }
+
+        /// <summary>면적 지시선 — 단일 객체 선택 후 중심→클릭점 지시선+면적 문자 배치</summary>
+        [CommandMethod("DP_ARL")]
+        public void AreaLeader()
+        {
+            var doc = Application.DocumentManager.MdiActiveDocument;
+            var db  = doc.Database; var ed = doc.Editor;
+
+            var per = ed.GetEntity(new PromptEntityOptions("\n면적을 산출할 객체 선택: "));
+            if (per.Status != PromptStatus.OK) return;
+
+            double areaValue   = 0.0;
+            Point3d centroidWCS = Point3d.Origin;
+
+            using (var tr = db.TransactionManager.StartTransaction())
+            {
+                var ent = (Entity)tr.GetObject(per.ObjectId, OpenMode.ForRead);
+                try
+                {
+                    var ext = ent.GeometricExtents;
+                    centroidWCS = ext.MinPoint + (ext.MaxPoint - ext.MinPoint) * 0.5;
+                }
+                catch { }
+
+                if (ent is Autodesk.AutoCAD.DatabaseServices.Polyline pl)
+                {
+                    if (pl.Closed) areaValue = pl.Area;
+                    else { using var c = (Autodesk.AutoCAD.DatabaseServices.Polyline)pl.Clone(); c.Closed = true; areaValue = c.Area; }
+                }
+                else if (ent is Polyline2d pl2)
+                {
+                    if (pl2.Closed) areaValue = pl2.Area;
+                    else { using var c = (Polyline2d)pl2.Clone(); c.Closed = true; areaValue = ((Curve)c).Area; }
+                }
+                else if (ent is Curve cv) areaValue = cv.Area;
+                else if (ent is Hatch h)  areaValue = h.Area;
+                else { ed.WriteMessage($"\n[미지원] {ent.GetType().Name} 은(는) 면적 계산 불가."); return; }
+                tr.Commit();
+            }
+
+            if (areaValue <= 1e-6) { ed.WriteMessage("\n면적이 0으로 계산되었습니다."); return; }
+
+            string areaText = $"{areaValue * 1e-6:N2} m²";
+
+            var ucs = ed.CurrentUserCoordinateSystem;
+            var ppo = new PromptPointOptions("\n면적 문자를 배치할 위치 지정: ")
+                { UseBasePoint = true, BasePoint = centroidWCS.TransformBy(ucs.Inverse()) };
+            var ppr = ed.GetPoint(ppo);
+            if (ppr.Status != PromptStatus.OK) return;
+
+            var textWCS = ppr.Value.TransformBy(ucs);
+
+            using (var tr = db.TransactionManager.StartTransaction())
+            {
+                var space = (BlockTableRecord)tr.GetObject(db.CurrentSpaceId, OpenMode.ForWrite);
+                double scl  = db.Cannoscale.Scale; if (scl <= 0) scl = 1.0;
+
+                var mt = new MText();
+                mt.SetDatabaseDefaults();
+                mt.Contents    = areaText;
+                mt.TextHeight  = 2.0 * scl;
+                mt.Location    = textWCS;
+                mt.Attachment  = textWCS.X > centroidWCS.X ? AttachmentPoint.MiddleLeft : AttachmentPoint.MiddleRight;
+                space.AppendEntity(mt); tr.AddNewlyCreatedDBObject(mt, true);
+
+                var ld = new Leader();
+                ld.SetDatabaseDefaults();
+                ld.HasArrowHead = true;
+                ld.Dimasz = ld.Dimasz * scl;
+                ld.AppendVertex(centroidWCS);
+                ld.AppendVertex(textWCS);
+                space.AppendEntity(ld); tr.AddNewlyCreatedDBObject(ld, true);
+                tr.Commit();
+            }
+            ed.WriteMessage($"\n면적 기입 완료: {areaText}");
+        }
     }
 }

@@ -769,5 +769,184 @@ namespace CivilRun_MadeByHouuu.Commands
             tr.Commit();
             ed.WriteMessage($"\n{count}개 치수 스타일을 병합했습니다.");
         }
+
+        // ══════════════════════════════════════════════
+        //  문자 III — 폰트 일괄 변경 / 문자 복제
+        // ══════════════════════════════════════════════
+
+        /// <summary>모든 문자 스타일을 malgun.ttf 로 일괄 변경</summary>
+        [CommandMethod("DP_FC")]
+        public void FontChange()
+        {
+            var doc = Application.DocumentManager.MdiActiveDocument;
+            var db  = doc.Database; var ed = doc.Editor;
+
+            var names = new List<string>();
+            using (var tr = db.TransactionManager.StartTransaction())
+            {
+                var tst = (TextStyleTable)tr.GetObject(db.TextStyleTableId, OpenMode.ForRead);
+                foreach (ObjectId id in tst)
+                    names.Add(((TextStyleTableRecord)tr.GetObject(id, OpenMode.ForRead)).Name);
+                tr.Commit();
+            }
+
+            short echo = System.Convert.ToInt16(Application.GetSystemVariable("CMDECHO"));
+            short nomt = System.Convert.ToInt16(Application.GetSystemVariable("NOMUTT"));
+            Application.SetSystemVariable("CMDECHO", (short)0);
+            Application.SetSystemVariable("NOMUTT",  (short)1);
+            foreach (var nm in names)
+            {
+                var safe = nm.Replace("\"", "\"\"");
+                doc.SendStringToExecute($"._-STYLE \"{safe}\" \"malgun.ttf\" 0 1 0 N N \n", true, false, false);
+            }
+            Application.SetSystemVariable("CMDECHO", echo);
+            Application.SetSystemVariable("NOMUTT",  nomt);
+            ed.WriteMessage($"\nDP_FC: {names.Count}개 문자 스타일을 malgun.ttf로 변경했습니다.");
+        }
+
+        // ── RB/RU 문자 복제 계열 ──────────────────────
+        // WCS 기준
+        [CommandMethod("DP_RB")]  public void RB()  { var ed = Application.DocumentManager.MdiActiveDocument.Editor; ProcessTextClone(ed, "WCS",    false, PromptOffset(ed), PromptNewHeight(ed)); }
+        [CommandMethod("DP_RU")]  public void RU()  { var ed = Application.DocumentManager.MdiActiveDocument.Editor; ProcessTextClone(ed, "WCS",    true,  PromptOffset(ed), PromptNewHeight(ed)); }
+        // 화면(SCREEN) 기준
+        [CommandMethod("DP_RBS")] public void RBS() { var ed = Application.DocumentManager.MdiActiveDocument.Editor; ProcessTextClone(ed, "SCREEN", false, PromptOffset(ed), PromptNewHeight(ed)); }
+        [CommandMethod("DP_RUS")] public void RUS() { var ed = Application.DocumentManager.MdiActiveDocument.Editor; ProcessTextClone(ed, "SCREEN", true,  PromptOffset(ed), PromptNewHeight(ed)); }
+        // UCS 기준
+        [CommandMethod("DP_RBU")] public void RBU() { var ed = Application.DocumentManager.MdiActiveDocument.Editor; ProcessTextClone(ed, "UCS",    false, PromptOffset(ed), PromptNewHeight(ed)); }
+        [CommandMethod("DP_RUU")] public void RUU() { var ed = Application.DocumentManager.MdiActiveDocument.Editor; ProcessTextClone(ed, "UCS",    true,  PromptOffset(ed), PromptNewHeight(ed)); }
+
+        // ── 내부 헬퍼 ──────────────────────────────────
+
+        private static double? PromptOffset(Editor ed)
+        {
+            var r = ed.GetDouble(new PromptDoubleOptions("\n오프셋 거리 입력 <자동>: ") { AllowNone = true, AllowZero = false, AllowNegative = false });
+            return r.Status == PromptStatus.OK ? r.Value : (double?)null;
+        }
+
+        private static double? PromptNewHeight(Editor ed)
+        {
+            var r = ed.GetDouble(new PromptDoubleOptions("\n복제 문자 높이 입력 <원본 유지>: ") { AllowNone = true, AllowZero = false, AllowNegative = false });
+            return r.Status == PromptStatus.OK ? r.Value : (double?)null;
+        }
+
+        private static void ProcessTextClone(Editor ed, string basis, bool up, double? fixedDist, double? newHeight)
+        {
+            var doc = Application.DocumentManager.MdiActiveDocument;
+            var db  = doc.Database;
+            var filter = new SelectionFilter(new[] { new TypedValue((int)DxfCode.Start, "TEXT,MTEXT") });
+            var pso    = new PromptSelectionOptions { MessageForAdding = up ? "\n문자 선택 (위로):" : "\n문자 선택 (아래로):" };
+            var psr    = ed.GetSelection(pso, filter);
+            if (psr.Status != PromptStatus.OK) { ed.WriteMessage("\n취소됨."); return; }
+
+            int count = 0;
+            using var tr = db.TransactionManager.StartTransaction();
+            var red   = Autodesk.AutoCAD.Colors.Color.FromColorIndex(Autodesk.AutoCAD.Colors.ColorMethod.ByAci, 10);
+            var white = Autodesk.AutoCAD.Colors.Color.FromColorIndex(Autodesk.AutoCAD.Colors.ColorMethod.ByAci, 7);
+
+            foreach (SelectedObject so in psr.Value)
+            {
+                if (so == null) continue;
+                var ent   = tr.GetObject(so.ObjectId, OpenMode.ForRead) as Entity; if (ent == null) continue;
+                var owner = (BlockTableRecord)tr.GetObject(ent.OwnerId, OpenMode.ForWrite);
+                double baseH = GetEffectiveHeight(tr, ent);
+                double dist  = fixedDist ?? 1.3 * baseH;
+
+                Geometry.Vector3d delta = basis switch
+                {
+                    "SCREEN" => GetDelta_Screen(ed, up, dist),
+                    "UCS"    => GetDelta_UCS(ed, up, dist),
+                    _        => GetDelta_WCS(up, dist),
+                };
+
+                if (ent is DBText dt)
+                {
+                    var c = (DBText)dt.Clone();
+                    c.TextStyleId = EnsureVarHeightStyle(tr, db, dt.TextStyleId);
+                    c.Height      = newHeight ?? baseH;
+                    c.Position    = dt.Position + delta;
+                    if (IsAligned(dt)) { c.AlignmentPoint = dt.AlignmentPoint + delta; c.Rotation = dt.Rotation; }
+                    c.Color = up ? white : red;
+                    owner.AppendEntity(c); tr.AddNewlyCreatedDBObject(c, true);
+                    if (up) { dt.UpgradeOpen(); dt.Color = red; }
+                    count++;
+                }
+                else if (ent is MText mt)
+                {
+                    var c = (MText)mt.Clone();
+                    c.TextHeight = newHeight ?? baseH;
+                    c.Location   = mt.Location + delta;
+                    c.Color = up ? white : red;
+                    owner.AppendEntity(c); tr.AddNewlyCreatedDBObject(c, true);
+                    if (up) { mt.UpgradeOpen(); mt.Color = red; }
+                    count++;
+                }
+            }
+            tr.Commit();
+            ed.WriteMessage($"\n완료: {count}개.");
+        }
+
+        private static bool IsAligned(DBText t) =>
+            t.HorizontalMode != TextHorizontalMode.TextLeft || t.VerticalMode != TextVerticalMode.TextBase;
+
+        private static double GetEffectiveHeight(Transaction tr, Entity ent)
+        {
+            if (ent is DBText dt)
+            {
+                if (dt.Height > 1e-9) return dt.Height;
+                var ts = (TextStyleTableRecord)tr.GetObject(dt.TextStyleId, OpenMode.ForRead);
+                return ts.TextSize > 1e-9 ? ts.TextSize : 2.5;
+            }
+            if (ent is MText mt)
+            {
+                if (mt.TextHeight > 1e-9) return mt.TextHeight;
+                var ts = (TextStyleTableRecord)tr.GetObject(mt.TextStyleId, OpenMode.ForRead);
+                return ts.TextSize > 1e-9 ? ts.TextSize : 2.5;
+            }
+            return 2.5;
+        }
+
+        private static ObjectId EnsureVarHeightStyle(Transaction tr, Database db, ObjectId baseStyleId)
+        {
+            var tst       = (TextStyleTable)tr.GetObject(db.TextStyleTableId, OpenMode.ForWrite);
+            var baseStyle = (TextStyleTableRecord)tr.GetObject(baseStyleId, OpenMode.ForRead);
+            string newName = baseStyle.Name + "_DLT_VAR";
+            if (tst.Has(newName)) return tst[newName];
+            var rec = new TextStyleTableRecord
+            {
+                Name = newName, FileName = baseStyle.FileName, BigFontFileName = baseStyle.BigFontFileName,
+                XScale = baseStyle.XScale, ObliquingAngle = baseStyle.ObliquingAngle,
+                IsVertical = baseStyle.IsVertical, FlagBits = baseStyle.FlagBits, TextSize = 0.0
+            };
+            var id = tst.Add(rec); tr.AddNewlyCreatedDBObject(rec, true); return id;
+        }
+
+        private static Geometry.Vector3d ZeroTiny(Geometry.Vector3d v, double tol = 1e-9) =>
+            new Geometry.Vector3d(
+                Math.Abs(v.X) < tol ? 0.0 : v.X,
+                Math.Abs(v.Y) < tol ? 0.0 : v.Y,
+                Math.Abs(v.Z) < tol ? 0.0 : v.Z);
+
+        private static void GetScreenAxes(Editor ed, out Geometry.Vector3d x, out Geometry.Vector3d y, out Geometry.Vector3d n)
+        {
+            var v   = ed.GetCurrentView(); n = v.ViewDirection.GetNormal();
+            var baseUp = Math.Abs(n.DotProduct(Geometry.Vector3d.ZAxis)) > 0.999 ? Geometry.Vector3d.XAxis : Geometry.Vector3d.ZAxis;
+            x = baseUp.CrossProduct(n).GetNormal(); y = n.CrossProduct(x).GetNormal();
+            if (Math.Abs(v.ViewTwist) > 1e-9) { x = x.RotateBy(v.ViewTwist, n); y = y.RotateBy(v.ViewTwist, n); }
+        }
+
+        private static Geometry.Vector3d GetDelta_Screen(Editor ed, bool up, double dist)
+        {
+            GetScreenAxes(ed, out _, out var y, out _);
+            return ZeroTiny((up ? y : y.Negate()).MultiplyBy(dist));
+        }
+
+        private static Geometry.Vector3d GetDelta_UCS(Editor ed, bool up, double dist)
+        {
+            var uy = ed.CurrentUserCoordinateSystem.CoordinateSystem3d.Yaxis;
+            return ZeroTiny((up ? uy : uy.Negate()).MultiplyBy(dist));
+        }
+
+        private static Geometry.Vector3d GetDelta_WCS(bool up, double dist) =>
+            ZeroTiny((up ? Geometry.Vector3d.YAxis : Geometry.Vector3d.YAxis.Negate()).MultiplyBy(dist));
     }
 }

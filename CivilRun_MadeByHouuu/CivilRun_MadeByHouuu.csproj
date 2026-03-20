@@ -5,6 +5,7 @@
     <AssemblyName>CivilRun_MadeByHouuu</AssemblyName>
     <RootNamespace>CivilRun_MadeByHouuu</RootNamespace>
     <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
     <Nullable>enable</Nullable>
     <LangVersion>10</LangVersion>
     <OutputType>Library</OutputType>

@@ -744,5 +744,253 @@ namespace CivilRun_MadeByHouuu.Commands
             tr.Commit();
             ed.WriteMessage($"\n{toDelete.Count}개 빈 레이어 삭제 완료.");
         }
+
+        // ══════════════════════════════════════════════
+        //  레이어 III — Xrecord 영구/임시 OFF 시스템
+        //  (DP_TLOF / DP_PLOFF / DP_TLON / DP_PLON / DP_LOL / DP_LONVP / DP_LONALL)
+        // ══════════════════════════════════════════════
+
+        /// <summary>선택 객체 레이어 임시 OFF (DP_TLON으로 복구)</summary>
+        [CommandMethod("DP_TLOF", CommandFlags.UsePickSet)]
+        public void TempLayerOff()
+        {
+            var doc = Application.DocumentManager.MdiActiveDocument;
+            var db = doc.Database; var ed = doc.Editor;
+            using var tr = db.TransactionManager.StartTransaction();
+
+            var selRes = ed.GetSelection(new PromptSelectionOptions { MessageForAdding = "\n임시로 끌 레이어의 객체 선택: " });
+            if (selRes.Status != PromptStatus.OK) { ed.WriteMessage("\n취소됨."); return; }
+
+            var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (SelectedObject so in selRes.Value)
+            {
+                var ent = tr.GetObject(so.ObjectId, OpenMode.ForRead) as Entity;
+                if (ent != null) names.Add(ent.Layer);
+            }
+            if (names.Count == 0) { ed.WriteMessage("\n선택된 객체가 없습니다."); return; }
+
+            SwitchToSafeLayerIfNeeded(db, tr, names);
+            Helpers.LayerXrecordHelper.AddToSet(db, tr, Helpers.LayerXrecordHelper.XrecTempName, names);
+
+            var lt = (LayerTable)tr.GetObject(db.LayerTableId, OpenMode.ForRead);
+            foreach (ObjectId id in lt)
+            {
+                var ltr = (LayerTableRecord)tr.GetObject(id, OpenMode.ForWrite);
+                if (names.Contains(ltr.Name)) ltr.IsOff = true;
+            }
+            tr.Commit();
+            ed.WriteMessage($"\nDP_TLOF: {names.Count}개 레이어 임시 OFF. (DP_TLON으로 복구)");
+        }
+
+        /// <summary>선택 객체 레이어 영구 OFF (DP_PLON으로만 복구)</summary>
+        [CommandMethod("DP_PLOFF", CommandFlags.UsePickSet)]
+        public void PermanentLayerOff()
+        {
+            var doc = Application.DocumentManager.MdiActiveDocument;
+            var db = doc.Database; var ed = doc.Editor;
+            using var tr = db.TransactionManager.StartTransaction();
+
+            var selRes = ed.GetSelection(new PromptSelectionOptions { MessageForAdding = "\n영구적으로 끌 레이어의 객체 선택: " });
+            if (selRes.Status != PromptStatus.OK) { ed.WriteMessage("\n취소됨."); return; }
+
+            var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (SelectedObject so in selRes.Value)
+            {
+                var ent = tr.GetObject(so.ObjectId, OpenMode.ForRead) as Entity;
+                if (ent != null) names.Add(ent.Layer);
+            }
+            if (names.Count == 0) { ed.WriteMessage("\n선택된 객체가 없습니다."); return; }
+
+            SwitchToSafeLayerIfNeeded(db, tr, names);
+            Helpers.LayerXrecordHelper.AddToSet(db, tr, Helpers.LayerXrecordHelper.XrecLoffName, names);
+
+            var lt = (LayerTable)tr.GetObject(db.LayerTableId, OpenMode.ForRead);
+            foreach (ObjectId id in lt)
+            {
+                var ltr = (LayerTableRecord)tr.GetObject(id, OpenMode.ForWrite);
+                if (names.Contains(ltr.Name)) ltr.IsOff = true;
+            }
+            tr.Commit();
+            ed.WriteMessage($"\nDP_PLOFF: {names.Count}개 레이어 영구 OFF 등록. (DP_PLON으로만 복구)");
+        }
+
+        /// <summary>임시 OFF 레이어 복구 (영구 PLOFF 목록 제외)</summary>
+        [CommandMethod("DP_TLON")]
+        public void RestoreTempLayers()
+        {
+            var doc = Application.DocumentManager.MdiActiveDocument;
+            var db = doc.Database; var ed = doc.Editor;
+            using var tr = db.TransactionManager.StartTransaction();
+
+            var temp = Helpers.LayerXrecordHelper.LoadSet(db, tr, Helpers.LayerXrecordHelper.XrecTempName);
+            var loff = Helpers.LayerXrecordHelper.LoadSet(db, tr, Helpers.LayerXrecordHelper.XrecLoffName);
+            var lt   = (LayerTable)tr.GetObject(db.LayerTableId, OpenMode.ForRead);
+            bool any = false;
+
+            if (temp.Count > 0)
+            {
+                foreach (ObjectId id in lt)
+                {
+                    var ltr = (LayerTableRecord)tr.GetObject(id, OpenMode.ForWrite);
+                    if (temp.Contains(ltr.Name) && !loff.Contains(ltr.Name))
+                    { if (ltr.IsFrozen) ltr.IsFrozen = false; if (ltr.IsOff) ltr.IsOff = false; any = true; }
+                }
+                Helpers.LayerXrecordHelper.ClearSet(db, tr, Helpers.LayerXrecordHelper.XrecTempName);
+            }
+            if (!any)
+            {
+                foreach (ObjectId id in lt)
+                {
+                    var ltr = (LayerTableRecord)tr.GetObject(id, OpenMode.ForWrite);
+                    if (!loff.Contains(ltr.Name))
+                    { if (ltr.IsFrozen) ltr.IsFrozen = false; if (ltr.IsOff) ltr.IsOff = false; }
+                }
+            }
+            tr.Commit();
+            ed.WriteMessage("\nDP_TLON: 임시 OFF 레이어 복구 완료 (영구 PLOFF 제외).");
+        }
+
+        /// <summary>모든 레이어 강제 복구 (영구 PLOFF 포함)</summary>
+        [CommandMethod("DP_PLON")]
+        public void RestoreAllLayersForce()
+        {
+            var doc = Application.DocumentManager.MdiActiveDocument;
+            var db = doc.Database; var ed = doc.Editor;
+            using var tr = db.TransactionManager.StartTransaction();
+            var lt = (LayerTable)tr.GetObject(db.LayerTableId, OpenMode.ForRead);
+            foreach (ObjectId id in lt)
+            {
+                var ltr = (LayerTableRecord)tr.GetObject(id, OpenMode.ForWrite);
+                if (ltr.IsFrozen) ltr.IsFrozen = false;
+                if (ltr.IsOff)    ltr.IsOff    = false;
+            }
+            Helpers.LayerXrecordHelper.ClearSet(db, tr, Helpers.LayerXrecordHelper.XrecTempName);
+            tr.Commit();
+            ed.WriteMessage("\nDP_PLON: 모든 레이어 강제 ON (영구 PLOFF 포함).");
+        }
+
+        /// <summary>선택 레이어만 ON, 나머지 임시 OFF (DP_TLON으로 복구)</summary>
+        [CommandMethod("DP_LOL", CommandFlags.UsePickSet)]
+        public void LayerOnlySelected()
+        {
+            var doc = Application.DocumentManager.MdiActiveDocument;
+            var db = doc.Database; var ed = doc.Editor;
+            using var tr = db.TransactionManager.StartTransaction();
+
+            var selRes = ed.GetSelection(new PromptSelectionOptions { MessageForAdding = "\n유지할 레이어의 객체 선택: " });
+            if (selRes.Status != PromptStatus.OK) { ed.WriteMessage("\n취소됨."); return; }
+
+            var keep = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (SelectedObject so in selRes.Value)
+            {
+                var ent = tr.GetObject(so.ObjectId, OpenMode.ForRead) as Entity;
+                if (ent != null) keep.Add(ent.Layer);
+            }
+            if (keep.Count == 0) { ed.WriteMessage("\n선택된 객체가 없습니다."); return; }
+
+            var loff      = Helpers.LayerXrecordHelper.LoadSet(db, tr, Helpers.LayerXrecordHelper.XrecLoffName);
+            var lt        = (LayerTable)tr.GetObject(db.LayerTableId, OpenMode.ForRead);
+            var turnedOff = new List<string>();
+
+            foreach (var k in keep) { if (lt.Has(k)) { db.Clayer = lt[k]; break; } }
+
+            foreach (ObjectId id in lt)
+            {
+                var ltr = (LayerTableRecord)tr.GetObject(id, OpenMode.ForWrite);
+                if (keep.Contains(ltr.Name))
+                { if (ltr.IsFrozen) ltr.IsFrozen = false; if (ltr.IsOff) ltr.IsOff = false; }
+                else
+                { if (!loff.Contains(ltr.Name)) turnedOff.Add(ltr.Name); ltr.IsOff = true; }
+            }
+            if (turnedOff.Count > 0)
+                Helpers.LayerXrecordHelper.AddToSet(db, tr, Helpers.LayerXrecordHelper.XrecTempName, turnedOff);
+            tr.Commit();
+            ed.WriteMessage($"\nDP_LOL: {keep.Count}개 레이어만 ON, 나머지 임시 OFF. (DP_TLON으로 복구)");
+        }
+
+        /// <summary>현재 뷰포트 레이어 오버라이드 해제 (배치 MSPACE에서 실행)</summary>
+        [CommandMethod("DP_LONVP")]
+        public void LayerOnViewport()
+        {
+            var doc = Application.DocumentManager.MdiActiveDocument;
+            var ed  = doc.Editor;
+            short tm = System.Convert.ToInt16(Application.GetSystemVariable("TILEMODE"));
+            int   cv = System.Convert.ToInt32(Application.GetSystemVariable("CVPORT"));
+            if (!(tm == 0 && cv > 2)) { ed.WriteMessage("\nDP_LONVP: 배치의 뷰포트 안(MSPACE)에서 실행하세요."); return; }
+
+            short echo = System.Convert.ToInt16(Application.GetSystemVariable("CMDECHO"));
+            short nomt = System.Convert.ToInt16(Application.GetSystemVariable("NOMUTT"));
+            Application.SetSystemVariable("CMDECHO", (short)0);
+            Application.SetSystemVariable("NOMUTT",  (short)1);
+            doc.SendStringToExecute("\x03\x03", true, false, false);
+            doc.SendStringToExecute("._-VPLAYER _THAW * \n", true, false, false);
+            doc.SendStringToExecute("._-VPLAYER _REMOVEOVERRIDES * \n", true, false, false);
+            Application.SetSystemVariable("CMDECHO", echo);
+            Application.SetSystemVariable("NOMUTT",  nomt);
+            ed.WriteMessage("\nDP_LONVP: 현재 뷰포트 레이어 오버라이드 제거 완료.");
+        }
+
+        /// <summary>전체 레이어 ON/동결해제 + 모든 레이아웃 뷰포트 초기화</summary>
+        [CommandMethod("DP_LONALL")]
+        public void LayerOnAllGlobal()
+        {
+            var doc = Application.DocumentManager.MdiActiveDocument;
+            var db  = doc.Database; var ed = doc.Editor;
+            using (var tr = db.TransactionManager.StartTransaction())
+            {
+                var loff = Helpers.LayerXrecordHelper.LoadSet(db, tr, Helpers.LayerXrecordHelper.XrecLoffName);
+                var lt   = (LayerTable)tr.GetObject(db.LayerTableId, OpenMode.ForRead);
+                foreach (ObjectId id in lt)
+                {
+                    var ltr = (LayerTableRecord)tr.GetObject(id, OpenMode.ForWrite);
+                    if (!loff.Contains(ltr.Name))
+                    { if (ltr.IsFrozen) ltr.IsFrozen = false; if (ltr.IsOff) ltr.IsOff = false; }
+                }
+                tr.Commit();
+            }
+            ThawAllLayoutViewports(doc);
+            ed.WriteMessage("\nDP_LONALL: 전체 레이어 ON + 모든 레이아웃 VP 초기화 완료.");
+        }
+
+        // ── 내부 헬퍼 ──────────────────────────────────
+
+        private static void SwitchToSafeLayerIfNeeded(Database db, Transaction tr, HashSet<string> willOff)
+        {
+            var cur = (LayerTableRecord)tr.GetObject(db.Clayer, OpenMode.ForRead);
+            if (!willOff.Contains(cur.Name)) return;
+            var lt = (LayerTable)tr.GetObject(db.LayerTableId, OpenMode.ForRead);
+            if (lt.Has("0")) db.Clayer = lt["0"];
+        }
+
+        private static void ThawAllLayoutViewports(Autodesk.AutoCAD.ApplicationServices.Document doc)
+        {
+            string curTab = (string)Application.GetSystemVariable("CTAB");
+            short tm   = System.Convert.ToInt16(Application.GetSystemVariable("TILEMODE"));
+            short echo = System.Convert.ToInt16(Application.GetSystemVariable("CMDECHO"));
+            short nomt = System.Convert.ToInt16(Application.GetSystemVariable("NOMUTT"));
+            Application.SetSystemVariable("CMDECHO", (short)0);
+            Application.SetSystemVariable("NOMUTT",  (short)1);
+            Application.SetSystemVariable("TILEMODE", (short)0);
+            var db = doc.Database;
+            using (var tr = db.TransactionManager.StartTransaction())
+            {
+                var dict = (DBDictionary)tr.GetObject(db.LayoutDictionaryId, OpenMode.ForRead);
+                foreach (DBDictionaryEntry kv in dict)
+                {
+                    var lay = (Layout)tr.GetObject(kv.Value, OpenMode.ForRead);
+                    if (lay.ModelType) continue;
+                    Application.SetSystemVariable("CTAB", lay.LayoutName);
+                    doc.SendStringToExecute("\x03\x03", true, false, false);
+                    doc.SendStringToExecute("._PSPACE \n", true, false, false);
+                    doc.SendStringToExecute("._-VPLAYER _THAW * _ALL \n", true, false, false);
+                    doc.SendStringToExecute("._-VPLAYER _REMOVEOVERRIDES * _ALL \n", true, false, false);
+                }
+                tr.Commit();
+            }
+            Application.SetSystemVariable("CTAB", curTab);
+            Application.SetSystemVariable("TILEMODE", tm);
+            Application.SetSystemVariable("CMDECHO", echo);
+            Application.SetSystemVariable("NOMUTT",  nomt);
+        }
     }
 }
