@@ -851,7 +851,7 @@ namespace CivilRun_MadeByHouuu.Commands
                 double baseH = GetEffectiveHeight(tr, ent);
                 double dist  = fixedDist ?? 1.3 * baseH;
 
-                Geometry.Vector3d delta = basis switch
+                Vector3d delta = basis switch
                 {
                     "SCREEN" => GetDelta_Screen(ed, up, dist),
                     "UCS"    => GetDelta_UCS(ed, up, dist),
@@ -920,33 +920,33 @@ namespace CivilRun_MadeByHouuu.Commands
             var id = tst.Add(rec); tr.AddNewlyCreatedDBObject(rec, true); return id;
         }
 
-        private static Geometry.Vector3d ZeroTiny(Geometry.Vector3d v, double tol = 1e-9) =>
-            new Geometry.Vector3d(
+        private static Vector3d ZeroTiny(Vector3d v, double tol = 1e-9) =>
+            new Vector3d(
                 Math.Abs(v.X) < tol ? 0.0 : v.X,
                 Math.Abs(v.Y) < tol ? 0.0 : v.Y,
                 Math.Abs(v.Z) < tol ? 0.0 : v.Z);
 
-        private static void GetScreenAxes(Editor ed, out Geometry.Vector3d x, out Geometry.Vector3d y, out Geometry.Vector3d n)
+        private static void GetScreenAxes(Editor ed, out Vector3d x, out Vector3d y, out Vector3d n)
         {
             var v   = ed.GetCurrentView(); n = v.ViewDirection.GetNormal();
-            var baseUp = Math.Abs(n.DotProduct(Geometry.Vector3d.ZAxis)) > 0.999 ? Geometry.Vector3d.XAxis : Geometry.Vector3d.ZAxis;
+            var baseUp = Math.Abs(n.DotProduct(Vector3d.ZAxis)) > 0.999 ? Vector3d.XAxis : Vector3d.ZAxis;
             x = baseUp.CrossProduct(n).GetNormal(); y = n.CrossProduct(x).GetNormal();
             if (Math.Abs(v.ViewTwist) > 1e-9) { x = x.RotateBy(v.ViewTwist, n); y = y.RotateBy(v.ViewTwist, n); }
         }
 
-        private static Geometry.Vector3d GetDelta_Screen(Editor ed, bool up, double dist)
+        private static Vector3d GetDelta_Screen(Editor ed, bool up, double dist)
         {
             GetScreenAxes(ed, out _, out var y, out _);
             return ZeroTiny((up ? y : y.Negate()).MultiplyBy(dist));
         }
 
-        private static Geometry.Vector3d GetDelta_UCS(Editor ed, bool up, double dist)
+        private static Vector3d GetDelta_UCS(Editor ed, bool up, double dist)
         {
             var uy = ed.CurrentUserCoordinateSystem.CoordinateSystem3d.Yaxis;
             return ZeroTiny((up ? uy : uy.Negate()).MultiplyBy(dist));
         }
 
-        private static Geometry.Vector3d GetDelta_WCS(bool up, double dist) =>
-            ZeroTiny((up ? Geometry.Vector3d.YAxis : Geometry.Vector3d.YAxis.Negate()).MultiplyBy(dist));
+        private static Vector3d GetDelta_WCS(bool up, double dist) =>
+            ZeroTiny((up ? Vector3d.YAxis : Vector3d.YAxis.Negate()).MultiplyBy(dist));
     }
 }
