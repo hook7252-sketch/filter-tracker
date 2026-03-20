@@ -20,7 +20,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- 리본 UI를 위한 AdWindows 참조 -->
+    <!-- 메뉴/UI API (PopupMenu, MenuGroup 등) -->
+    <Reference Include="acmgd">
+      <HintPath>$(AutoCadPath)\acmgd.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="AdWindows">
       <HintPath>$(AutoCadPath)\AdWindows.dll</HintPath>
       <Private>False</Private>
