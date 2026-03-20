@@ -21,7 +21,7 @@ namespace CivilRun_MadeByHouuu
                 ComponentManager.ItemInitialized += OnRibbonReady;
         }
 
-        private static void OnRibbonReady(object sender, ComponentManager.ItemInitializedEventArgs e)
+        private static void OnRibbonReady(object sender, RibbonItemEventArgs e)
         {
             if (ComponentManager.Ribbon != null)
             {
