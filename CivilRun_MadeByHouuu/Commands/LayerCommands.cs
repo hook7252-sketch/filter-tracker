@@ -747,11 +747,11 @@ namespace CivilRun_MadeByHouuu.Commands
 
         // ══════════════════════════════════════════════
         //  레이어 III — Xrecord 영구/임시 OFF 시스템
-        //  (DP_TLOF / DP_PLOFF / DP_TLON / DP_PLON / DP_LOL / DP_LONVP / DP_LONALL)
+        //  (LOF / LOFF / LON / LONN / LOL / LONVP / LONALL)
         // ══════════════════════════════════════════════
 
-        /// <summary>선택 객체 레이어 임시 OFF (DP_TLON으로 복구)</summary>
-        [CommandMethod("DP_TLOF", CommandFlags.UsePickSet)]
+        /// <summary>선택 객체 레이어 임시 OFF (LON으로 복구)</summary>
+        [CommandMethod("LOF", CommandFlags.UsePickSet)]
         public void TempLayerOff()
         {
             var doc = Application.DocumentManager.MdiActiveDocument;
@@ -779,11 +779,11 @@ namespace CivilRun_MadeByHouuu.Commands
                 if (names.Contains(ltr.Name)) ltr.IsOff = true;
             }
             tr.Commit();
-            ed.WriteMessage($"\nDP_TLOF: {names.Count}개 레이어 임시 OFF. (DP_TLON으로 복구)");
+            ed.WriteMessage($"\nLOF: {names.Count}개 레이어 임시 OFF. (LON으로 복구)");
         }
 
-        /// <summary>선택 객체 레이어 영구 OFF (DP_PLON으로만 복구)</summary>
-        [CommandMethod("DP_PLOFF", CommandFlags.UsePickSet)]
+        /// <summary>선택 객체 레이어 영구 OFF (LONN으로만 복구)</summary>
+        [CommandMethod("LOFF", CommandFlags.UsePickSet)]
         public void PermanentLayerOff()
         {
             var doc = Application.DocumentManager.MdiActiveDocument;
@@ -811,11 +811,11 @@ namespace CivilRun_MadeByHouuu.Commands
                 if (names.Contains(ltr.Name)) ltr.IsOff = true;
             }
             tr.Commit();
-            ed.WriteMessage($"\nDP_PLOFF: {names.Count}개 레이어 영구 OFF 등록. (DP_PLON으로만 복구)");
+            ed.WriteMessage($"\nLOFF: {names.Count}개 레이어 영구 OFF 등록. (LONN으로만 복구)");
         }
 
-        /// <summary>임시 OFF 레이어 복구 (영구 PLOFF 목록 제외)</summary>
-        [CommandMethod("DP_TLON")]
+        /// <summary>임시 OFF 레이어 복구 (영구 LOFF 목록 제외)</summary>
+        [CommandMethod("LON")]
         public void RestoreTempLayers()
         {
             var doc = Application.DocumentManager.MdiActiveDocument;
@@ -847,11 +847,11 @@ namespace CivilRun_MadeByHouuu.Commands
                 }
             }
             tr.Commit();
-            ed.WriteMessage("\nDP_TLON: 임시 OFF 레이어 복구 완료 (영구 PLOFF 제외).");
+            ed.WriteMessage("\nLON: 임시 OFF 레이어 복구 완료 (영구 LOFF 제외).");
         }
 
-        /// <summary>모든 레이어 강제 복구 (영구 PLOFF 포함)</summary>
-        [CommandMethod("DP_PLON")]
+        /// <summary>모든 레이어 강제 복구 (영구 LOFF 포함)</summary>
+        [CommandMethod("LONN")]
         public void RestoreAllLayersForce()
         {
             var doc = Application.DocumentManager.MdiActiveDocument;
@@ -866,11 +866,11 @@ namespace CivilRun_MadeByHouuu.Commands
             }
             Helpers.LayerXrecordHelper.ClearSet(db, tr, Helpers.LayerXrecordHelper.XrecTempName);
             tr.Commit();
-            ed.WriteMessage("\nDP_PLON: 모든 레이어 강제 ON (영구 PLOFF 포함).");
+            ed.WriteMessage("\nLONN: 모든 레이어 강제 ON (영구 LOFF 포함).");
         }
 
-        /// <summary>선택 레이어만 ON, 나머지 임시 OFF (DP_TLON으로 복구)</summary>
-        [CommandMethod("DP_LOL", CommandFlags.UsePickSet)]
+        /// <summary>선택 레이어만 ON, 나머지 임시 OFF (LON으로 복구)</summary>
+        [CommandMethod("LOL", CommandFlags.UsePickSet)]
         public void LayerOnlySelected()
         {
             var doc = Application.DocumentManager.MdiActiveDocument;
@@ -905,18 +905,18 @@ namespace CivilRun_MadeByHouuu.Commands
             if (turnedOff.Count > 0)
                 Helpers.LayerXrecordHelper.AddToSet(db, tr, Helpers.LayerXrecordHelper.XrecTempName, turnedOff);
             tr.Commit();
-            ed.WriteMessage($"\nDP_LOL: {keep.Count}개 레이어만 ON, 나머지 임시 OFF. (DP_TLON으로 복구)");
+            ed.WriteMessage($"\nLOL: {keep.Count}개 레이어만 ON, 나머지 임시 OFF. (LON으로 복구)");
         }
 
         /// <summary>현재 뷰포트 레이어 오버라이드 해제 (배치 MSPACE에서 실행)</summary>
-        [CommandMethod("DP_LONVP")]
+        [CommandMethod("LONVP")]
         public void LayerOnViewport()
         {
             var doc = Application.DocumentManager.MdiActiveDocument;
             var ed  = doc.Editor;
             short tm = System.Convert.ToInt16(Application.GetSystemVariable("TILEMODE"));
             int   cv = System.Convert.ToInt32(Application.GetSystemVariable("CVPORT"));
-            if (!(tm == 0 && cv > 2)) { ed.WriteMessage("\nDP_LONVP: 배치의 뷰포트 안(MSPACE)에서 실행하세요."); return; }
+            if (!(tm == 0 && cv > 2)) { ed.WriteMessage("\nLONVP: 배치의 뷰포트 안(MSPACE)에서 실행하세요."); return; }
 
             short echo = System.Convert.ToInt16(Application.GetSystemVariable("CMDECHO"));
             short nomt = System.Convert.ToInt16(Application.GetSystemVariable("NOMUTT"));
@@ -927,11 +927,11 @@ namespace CivilRun_MadeByHouuu.Commands
             doc.SendStringToExecute("._-VPLAYER _REMOVEOVERRIDES * \n", true, false, false);
             Application.SetSystemVariable("CMDECHO", echo);
             Application.SetSystemVariable("NOMUTT",  nomt);
-            ed.WriteMessage("\nDP_LONVP: 현재 뷰포트 레이어 오버라이드 제거 완료.");
+            ed.WriteMessage("\nLONVP: 현재 뷰포트 레이어 오버라이드 제거 완료.");
         }
 
         /// <summary>전체 레이어 ON/동결해제 + 모든 레이아웃 뷰포트 초기화</summary>
-        [CommandMethod("DP_LONALL")]
+        [CommandMethod("LONALL")]
         public void LayerOnAllGlobal()
         {
             var doc = Application.DocumentManager.MdiActiveDocument;
@@ -949,7 +949,7 @@ namespace CivilRun_MadeByHouuu.Commands
                 tr.Commit();
             }
             ThawAllLayoutViewports(doc);
-            ed.WriteMessage("\nDP_LONALL: 전체 레이어 ON + 모든 레이아웃 VP 초기화 완료.");
+            ed.WriteMessage("\nLONALL: 전체 레이어 ON + 모든 레이아웃 VP 초기화 완료.");
         }
 
         // ── 내부 헬퍼 ──────────────────────────────────

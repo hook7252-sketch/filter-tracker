@@ -207,7 +207,7 @@ namespace CivilRun_MadeByHouuu.Commands
         private static int s_cuCounter = 1;
 
         /// <summary>견본 원+숫자를 클릭 위치마다 연속 복제하며 자동 번호 증가</summary>
-        [CommandMethod("DP_CU", CommandFlags.Modal | CommandFlags.UsePickSet)]
+        [CommandMethod("CU", CommandFlags.Modal | CommandFlags.UsePickSet)]
         public void CU()
         {
             var doc = Application.DocumentManager.MdiActiveDocument;
@@ -287,7 +287,7 @@ namespace CivilRun_MadeByHouuu.Commands
         // ══════════════════════════════════════════════
 
         /// <summary>X/Y 축별 다른 스케일 적용 — 측정 보조 포함</summary>
-        [CommandMethod("DP_XYB", CommandFlags.Modal)]
+        [CommandMethod("XYB", CommandFlags.Modal)]
         public void XYB()
         {
             var doc = Application.DocumentManager.MdiActiveDocument;

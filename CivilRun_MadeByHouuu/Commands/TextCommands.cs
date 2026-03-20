@@ -775,7 +775,7 @@ namespace CivilRun_MadeByHouuu.Commands
         // ══════════════════════════════════════════════
 
         /// <summary>모든 문자 스타일을 malgun.ttf 로 일괄 변경</summary>
-        [CommandMethod("DP_FC")]
+        [CommandMethod("FC")]
         public void FontChange()
         {
             var doc = Application.DocumentManager.MdiActiveDocument;
@@ -801,19 +801,19 @@ namespace CivilRun_MadeByHouuu.Commands
             }
             Application.SetSystemVariable("CMDECHO", echo);
             Application.SetSystemVariable("NOMUTT",  nomt);
-            ed.WriteMessage($"\nDP_FC: {names.Count}개 문자 스타일을 malgun.ttf로 변경했습니다.");
+            ed.WriteMessage($"\nFC: {names.Count}개 문자 스타일을 malgun.ttf로 변경했습니다.");
         }
 
         // ── RB/RU 문자 복제 계열 ──────────────────────
         // WCS 기준
-        [CommandMethod("DP_RB")]  public void RB()  { var ed = Application.DocumentManager.MdiActiveDocument.Editor; ProcessTextClone(ed, "WCS",    false, PromptOffset(ed), PromptNewHeight(ed)); }
-        [CommandMethod("DP_RU")]  public void RU()  { var ed = Application.DocumentManager.MdiActiveDocument.Editor; ProcessTextClone(ed, "WCS",    true,  PromptOffset(ed), PromptNewHeight(ed)); }
+        [CommandMethod("RB")]  public void RB()  { var ed = Application.DocumentManager.MdiActiveDocument.Editor; ProcessTextClone(ed, "WCS",    false, PromptOffset(ed), PromptNewHeight(ed)); }
+        [CommandMethod("RU")]  public void RU()  { var ed = Application.DocumentManager.MdiActiveDocument.Editor; ProcessTextClone(ed, "WCS",    true,  PromptOffset(ed), PromptNewHeight(ed)); }
         // 화면(SCREEN) 기준
-        [CommandMethod("DP_RBS")] public void RBS() { var ed = Application.DocumentManager.MdiActiveDocument.Editor; ProcessTextClone(ed, "SCREEN", false, PromptOffset(ed), PromptNewHeight(ed)); }
-        [CommandMethod("DP_RUS")] public void RUS() { var ed = Application.DocumentManager.MdiActiveDocument.Editor; ProcessTextClone(ed, "SCREEN", true,  PromptOffset(ed), PromptNewHeight(ed)); }
+        [CommandMethod("RBS")] public void RBS() { var ed = Application.DocumentManager.MdiActiveDocument.Editor; ProcessTextClone(ed, "SCREEN", false, PromptOffset(ed), PromptNewHeight(ed)); }
+        [CommandMethod("RUS")] public void RUS() { var ed = Application.DocumentManager.MdiActiveDocument.Editor; ProcessTextClone(ed, "SCREEN", true,  PromptOffset(ed), PromptNewHeight(ed)); }
         // UCS 기준
-        [CommandMethod("DP_RBU")] public void RBU() { var ed = Application.DocumentManager.MdiActiveDocument.Editor; ProcessTextClone(ed, "UCS",    false, PromptOffset(ed), PromptNewHeight(ed)); }
-        [CommandMethod("DP_RUU")] public void RUU() { var ed = Application.DocumentManager.MdiActiveDocument.Editor; ProcessTextClone(ed, "UCS",    true,  PromptOffset(ed), PromptNewHeight(ed)); }
+        [CommandMethod("RBU")] public void RBU() { var ed = Application.DocumentManager.MdiActiveDocument.Editor; ProcessTextClone(ed, "UCS",    false, PromptOffset(ed), PromptNewHeight(ed)); }
+        [CommandMethod("RUU")] public void RUU() { var ed = Application.DocumentManager.MdiActiveDocument.Editor; ProcessTextClone(ed, "UCS",    true,  PromptOffset(ed), PromptNewHeight(ed)); }
 
         // ── 내부 헬퍼 ──────────────────────────────────
 

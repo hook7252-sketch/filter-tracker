@@ -8,16 +8,16 @@ namespace CivilRun_MadeByHouuu.Commands
 {
     /// <summary>
     /// 도면 마킹/배지 명령어
-    /// DP_BY : 변경있음 배지
-    /// DP_BN : 변경없음 배지
+    /// BY : 변경있음 배지
+    /// BN : 변경없음 배지
     /// </summary>
     public class DrawingCommands
     {
-        [CommandMethod("DP_BY")]
-        public void BadgeYes() => CreateBadge("변경있음", 10, "DP_BY");
+        [CommandMethod("BY")]
+        public void BadgeYes() => CreateBadge("변경있음", 10, "BY");
 
-        [CommandMethod("DP_BN")]
-        public void BadgeNo()  => CreateBadge("변경없음",  7, "DP_BN");
+        [CommandMethod("BN")]
+        public void BadgeNo()  => CreateBadge("변경없음",  7, "BN");
 
         // ── 내부 헬퍼 ──────────────────────────────────
 

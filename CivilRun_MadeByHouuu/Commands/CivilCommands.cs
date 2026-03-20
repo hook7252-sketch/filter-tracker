@@ -762,7 +762,7 @@ namespace CivilRun_MadeByHouuu.Commands
         // ══════════════════════════════════════════════
 
         /// <summary>XY 좌표 지시선 — 화살표+꺾임+X/Y 문자 자동 배치</summary>
-        [CommandMethod("DP_XY")]
+        [CommandMethod("XY")]
         public void XY()
         {
             var doc = Application.DocumentManager.MdiActiveDocument;
@@ -829,7 +829,7 @@ namespace CivilRun_MadeByHouuu.Commands
         }
 
         /// <summary>면적 지시선 — 단일 객체 선택 후 중심→클릭점 지시선+면적 문자 배치</summary>
-        [CommandMethod("DP_ARL")]
+        [CommandMethod("ARL")]
         public void AreaLeader()
         {
             var doc = Application.DocumentManager.MdiActiveDocument;
