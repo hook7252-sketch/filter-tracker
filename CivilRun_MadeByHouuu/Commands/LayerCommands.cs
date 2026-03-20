@@ -544,7 +544,7 @@ namespace CivilRun_MadeByHouuu.Commands
             if (!lsm.HasLayerState(nameRes.StringResult))
             { ed.WriteMessage($"\n'{nameRes.StringResult}' 레이어 상태가 없습니다."); return; }
 
-            lsm.RestoreLayerState(nameRes.StringResult, ObjectId.Null,
+            lsm.RestoreLayerState(nameRes.StringResult, ObjectId.Null, 0,
                 LayerStateMasks.Color | LayerStateMasks.Frozen |
                 LayerStateMasks.Locked | LayerStateMasks.Plot);
             ed.WriteMessage($"\n레이어 상태 '{nameRes.StringResult}'을 복원했습니다.");

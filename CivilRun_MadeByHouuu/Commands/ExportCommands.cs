@@ -82,7 +82,7 @@ namespace CivilRun_MadeByHouuu.Commands
                     engine.BeginPlot(prog, null);
                     engine.BeginDocument(pi, doc.Name, null, 1, true, pdfPath);
                     var ppi = new PlotPageInfo();
-                    engine.BeginPage(ppi, new PlotPageInfo(), true, null);
+                    engine.BeginPage(ppi, pi, true, null);
                     engine.BeginGenerateGraphics(null);
                     engine.EndGenerateGraphics(null);
                     engine.EndPage(null);
