@@ -95,8 +95,3 @@ export async function runAnalysis(
   return res.json();
 }
 
-export function getStreamAnalysisUrl(documentIds: string[], analysisTypes: string[]): string {
-  const ids = documentIds.join(",");
-  const types = analysisTypes.join(",");
-  return `${API_BASE}/api/analysis/stream?document_ids=${encodeURIComponent(ids)}&analysis_types=${encodeURIComponent(types)}`;
-}

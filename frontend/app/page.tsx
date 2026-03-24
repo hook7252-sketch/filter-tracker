@@ -36,9 +36,8 @@ const DOC_CONFIGS = [
 ];
 
 const ANALYSIS_OPTIONS = [
-  { id: "cross_check", label: "문서 간 상호 비교", desc: "도면↔수량산출서↔내역서 정합성 검토" },
-  { id: "standard_check", label: "표준품셈 기준 검토", desc: "건설공사 표준품셈 및 원가기준 비교" },
-  { id: "quantity_check", label: "수량 산출 검토", desc: "수량 계산식 및 단위 오류 검토" },
+  { id: "cross_check", label: "문서 간 상호 비교", desc: "도면↔수량산출서↔내역서 항목·수량·단위 직접 비교" },
+  { id: "quantity_check", label: "수량 산출 검토", desc: "음수 수량 등 계산 오류 검토" },
 ];
 
 export default function HomePage() {
@@ -48,7 +47,7 @@ export default function HomePage() {
     boq: undefined,
   });
   const [analysisTypes, setAnalysisTypes] = useState<string[]>([
-    "cross_check", "standard_check", "quantity_check",
+    "cross_check", "quantity_check",
   ]);
   const [analyzing, setAnalyzing] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
@@ -135,7 +134,7 @@ export default function HomePage() {
                 건설공사 발주도서 검토 툴
               </h1>
               <p className="text-xs text-gray-500 hidden sm:block">
-                AI 기반 설계도면 · 수량산출서 · 내역서 상호 검토
+                설계도면 · 수량산출서 · 내역서 직접 비교 검토
               </p>
             </div>
           </div>
@@ -226,7 +225,7 @@ export default function HomePage() {
             <span className="w-6 h-6 rounded-full bg-gray-200 text-gray-600 text-xs font-bold flex items-center justify-center flex-shrink-0">
               3
             </span>
-            <h2 className="font-semibold text-gray-800">AI 검토 실행</h2>
+            <h2 className="font-semibold text-gray-800">문서 비교 검토 실행</h2>
           </div>
 
           <div className="flex flex-wrap gap-2 mb-3">
@@ -267,7 +266,7 @@ export default function HomePage() {
             {analyzing ? (
               <>
                 <RefreshCw className="w-4 h-4 animate-spin" />
-                Claude AI 분석 중...
+                비교 분석 중...
               </>
             ) : (
               <>
@@ -302,7 +301,7 @@ export default function HomePage() {
 
       <footer className="mt-12 border-t border-gray-200 py-6">
         <div className="max-w-5xl mx-auto px-4 text-center text-xs text-gray-400">
-          건설공사 발주도서 검토 툴 · Powered by Claude Opus 4.6
+          건설공사 발주도서 검토 툴 · 직접 비교 분석
         </div>
       </footer>
     </div>
