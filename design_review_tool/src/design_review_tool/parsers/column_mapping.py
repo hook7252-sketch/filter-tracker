@@ -1,15 +1,38 @@
 from __future__ import annotations
 
 import json
+import os
+import shutil
+import sys
 from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Callable, Optional
 
 from design_review_tool.io.excel_reader import SheetReader
 
-DEFAULT_CONFIG_PATH = Path(__file__).resolve().parent.parent / "config" / "column_mappings.json"
-
 REQUIRED_FIELDS = ("공종", "규격", "단위", "수량")
+
+
+def _default_config_path() -> Path:
+    """
+    PyInstaller onefile로 얼린 실행 파일에서는 매 실행마다 임시 폴더(sys._MEIPASS)에
+    번들이 풀렸다가 종료 시 삭제되므로, 그 안에 설정을 저장하면 다음 실행에서 재사용할
+    수 없다. 얼린 상태에서는 %APPDATA%(윈도우) 아래 영속 위치에 설정을 두고, 최초 실행
+    시에만 번들에 포함된 기본 설정을 복사해 시드로 사용한다.
+    """
+    if getattr(sys, "frozen", False):
+        app_data = Path(os.environ.get("APPDATA") or Path.home())
+        user_config = app_data / "DesignReviewTool" / "column_mappings.json"
+        if not user_config.exists():
+            bundled = Path(getattr(sys, "_MEIPASS", "")) / "design_review_tool" / "config" / "column_mappings.json"
+            user_config.parent.mkdir(parents=True, exist_ok=True)
+            if bundled.exists():
+                shutil.copy(bundled, user_config)
+        return user_config
+    return Path(__file__).resolve().parent.parent / "config" / "column_mappings.json"
+
+
+DEFAULT_CONFIG_PATH = _default_config_path()
 
 
 @dataclass

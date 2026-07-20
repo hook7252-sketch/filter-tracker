@@ -16,9 +16,11 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=7.0"]
+gui = ["pyinstaller>=6.0"]
 
 [project.scripts]
 qty-vs-sgs = "design_review_tool.features.quantity_vs_sgs.cli:main"
+qty-vs-sgs-gui = "design_review_tool.gui.app:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

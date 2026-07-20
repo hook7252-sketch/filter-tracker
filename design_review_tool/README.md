@@ -15,7 +15,41 @@ cd design_review_tool
 pip install -e .          # 또는: pip install -r requirements.txt
 ```
 
-## 사용법
+## 사용법 — GUI (파일 추가 방식)
+
+명령줄이 익숙하지 않다면 GUI를 쓰는 게 편합니다.
+
+```bash
+pip install -e .
+python -m design_review_tool.gui.app
+```
+
+(설치 후에는 `qty-vs-sgs-gui` 명령으로도 실행할 수 있습니다.)
+
+창에서 "찾아보기"로 SGS내역서를, "+ 파일 추가"로 수량산출서(여러 개 선택 가능)를
+고르면 됩니다. 처음 보는 파일이면 시트 목록과 첫 5행을 보여주는 창이 뜨고
+공종/규격/단위/수량 열 번호와 대분류를 입력하면 됩니다 — 입력한 내용은 저장되어
+다음에 같은 이름 패턴의 파일을 추가할 때 자동으로 재사용됩니다. "비교 실행"을
+누르면 아래 결과 영역에 등급별 탭(매칭(확정)/확인 필요/미매칭)으로 나뉘어
+표시되고, "엑셀로 저장" 버튼으로 등급별 시트가 나뉜 .xlsx나 .csv로 내보낼 수
+있습니다.
+
+### 더블클릭 실행 파일(.exe)로 만들기 (Windows)
+
+Windows에서 아래를 실행하면 `dist\설계도서검토툴.exe` 하나로 배포/실행할 수
+있습니다 (PyInstaller가 필요한 라이브러리를 전부 포함해 하나의 파일로 묶어줍니다).
+
+```powershell
+cd design_review_tool
+build_exe.bat
+```
+
+빌드된 `.exe`는 Python이 안 깔린 PC에서도 더블클릭만으로 실행됩니다. 컬럼 매핑
+설정(새 파일 학습 결과)은 실행 파일 자체가 아니라 `%APPDATA%\DesignReviewTool\column_mappings.json`에
+저장되므로, exe를 다시 빌드하거나 옮겨도 한 번 가르쳐둔 파일명 패턴은 계속
+재사용됩니다.
+
+## 사용법 — CLI
 
 ```bash
 python -m design_review_tool.features.quantity_vs_sgs.cli \
@@ -53,8 +87,11 @@ src/design_review_tool/
 ├── matching/
 │   └── engine.py       # MatchGrade/MatchConfig/MatchResult, match_items()
 ├── features/quantity_vs_sgs/
-│   ├── cli.py           # 실행 진입점
+│   ├── cli.py           # CLI 실행 진입점
 │   └── report.py        # 콘솔 출력 + CSV/엑셀 저장
+├── gui/
+│   ├── app.py               # Tkinter 메인 창 (파일 추가/비교 실행/결과 탭/엑셀 저장)
+│   └── mapping_dialog.py    # 새 파일의 컬럼 매핑을 입력받는 모달 창
 └── config/
     └── column_mappings.json  # 파일명 패턴 → {시트, 컬럼 위치, 대분류} 기본 설정
 ```
