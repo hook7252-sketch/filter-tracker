@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "design-review-tool"
+version = "0.1.0"
+description = "설계도서 검토 툴 - 기능 2: 수량산출서 ↔ SGS내역서 비교"
+requires-python = ">=3.9"
+dependencies = [
+    "xlrd>=2.0.1",
+    "openpyxl>=3.1",
+    "pandas>=2.0",
+    "rapidfuzz>=3.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0"]
+gui = ["pyinstaller>=6.0"]
+
+[project.scripts]
+qty-vs-sgs = "design_review_tool.features.quantity_vs_sgs.cli:main"
+qty-vs-sgs-gui = "design_review_tool.gui.app:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+design_review_tool = ["config/*.json"]
