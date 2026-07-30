@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+.venv/
+.design_review_cache/
+*.xlsx
