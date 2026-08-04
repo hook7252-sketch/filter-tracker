@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>소모품 교체 주기 관리</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+      background: #1a1a2e;
+      color: #eee;
+      padding: 16px;
+      min-height: 100vh;
+    }
+    h1 {
+      text-align: center;
+      font-size: 20px;
+      margin-bottom: 6px;
+      color: #fff;
+      letter-spacing: 1px;
+    }
+    .subtitle {
+      text-align: center;
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 20px;
+    }
+    .category-section {
+      margin-bottom: 24px;
+    }
+    .category-title {
+      font-size: 13px;
+      font-weight: bold;
+      color: #aaa;
+      margin-bottom: 10px;
+      padding-left: 4px;
+      border-left: 3px solid #e74c3c;
+      padding-left: 8px;
+    }
+    .card {
+      background: #16213e;
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      border: 1px solid #0f3460;
+    }
+    .icon {
+      font-size: 26px;
+      min-width: 36px;
+      text-align: center;
+    }
+    .info { flex: 1; }
+    .name {
+      font-size: 15px;
+      font-weight: bold;
+      color: #f0f0f0;
+      margin-bottom: 3px;
+    }
+    .location {
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 4px;
+    }
+    .cycle-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    .cycle-30  { background: #e74c3c22; color: #e74c3c; border: 1px solid #e74c3c55; }
+    .cycle-90  { background: #f39c1222; color: #f39c12; border: 1px solid #f39c1255; }
+    .cycle-180 { background: #27ae6022; color: #2ecc71; border: 1px solid #27ae6055; }
+    .cycle-365 { background: #2980b922; color: #3498db; border: 1px solid #2980b955; }
+
+    .memo-box {
+      background: #0f3460;
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-top: 20px;
+      font-size: 13px;
+      color: #aaa;
+      line-height: 1.8;
+    }
+    .memo-box strong { color: #fff; display: block; margin-bottom: 6px; }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 20px;
+      justify-content: center;
+    }
+    .legend-item {
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🏠 소모품 교체 주기</h1>
+  <p class="subtitle">까먹지마 앱 입력용 참고표</p>
+
+  <div class="legend">
+    <span class="legend-item cycle-30">● 1개월마다</span>
+    <span class="legend-item cycle-90">● 3개월마다</span>
+    <span class="legend-item cycle-180">● 6개월마다</span>
+    <span class="legend-item cycle-365">● 1년마다</span>
+  </div>
+
+  <!-- 공기청정기 -->
+  <div class="category-section">
+    <div class="category-title">🌬️ 공기청정기</div>
+
+    <div class="card">
+      <div class="icon">💨</div>
+      <div class="info">
+        <div class="name">위닉스 타워프라임 플러스</div>
+        <div class="location">📍 거실</div>
+        <span class="cycle-badge cycle-180">6개월마다 (180일)</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="icon">💨</div>
+      <div class="info">
+        <div class="name">삼성 블루스카이 3100</div>
+        <div class="location">📍 옷방</div>
+        <span class="cycle-badge cycle-180">6개월마다 (180일)</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="icon">💨</div>
+      <div class="info">
+        <div class="name">삼성 비스포크 큐브 AX053CB800SLD</div>
+        <div class="location">📍 안방</div>
+        <span class="cycle-badge cycle-180">6개월마다 (180일)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 가습기 -->
+  <div class="category-section">
+    <div class="category-title">💧 가습기</div>
+
+    <div class="card">
+      <div class="icon">🌫️</div>
+      <div class="info">
+        <div class="name">브루네 가습기 B125</div>
+        <div class="location">📍 거실</div>
+        <span class="cycle-badge cycle-90">3개월마다 (90일)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 수전 -->
+  <div class="category-section">
+    <div class="category-title">🚿 수전 / 샤워기</div>
+
+    <div class="card">
+      <div class="icon">🚰</div>
+      <div class="info">
+        <div class="name">바우젠 퓨리데이</div>
+        <div class="location">📍 주방</div>
+        <span class="cycle-badge cycle-180">6개월마다 (180일)</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="icon">🚿</div>
+      <div class="info">
+        <div class="name">다이소 샤워기 헤드</div>
+        <div class="location">📍 거실 화장실</div>
+        <span class="cycle-badge cycle-365">1년마다 (365일)</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="icon">🍼</div>
+      <div class="info">
+        <div class="name">클리어잭 아기 비데 수전</div>
+        <div class="location">📍 거실 화장실</div>
+        <span class="cycle-badge cycle-180">6개월마다 (180일)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 칫솔 -->
+  <div class="category-section">
+    <div class="category-title">🪥 칫솔</div>
+
+    <div class="card">
+      <div class="icon">🦷</div>
+      <div class="info">
+        <div class="name">오랄비 Io9</div>
+        <div class="location">📍 거실 화장실</div>
+        <span class="cycle-badge cycle-90">3개월마다 (90일)</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="icon">🦷</div>
+      <div class="info">
+        <div class="name">오랄비 지니어스 9000</div>
+        <div class="location">📍 사무실</div>
+        <span class="cycle-badge cycle-90">3개월마다 (90일)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 기타 -->
+  <div class="category-section">
+    <div class="category-title">🧺 기타</div>
+
+    <div class="card">
+      <div class="icon">🫧</div>
+      <div class="info">
+        <div class="name">닥터피엘 세탁기 필터</div>
+        <div class="location">📍 세탁실</div>
+        <span class="cycle-badge cycle-90">3개월마다 (90일)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 면도기 -->
+  <div class="category-section">
+    <div class="category-title">🪒 면도기</div>
+
+    <div class="card">
+      <div class="icon">🪒</div>
+      <div class="info">
+        <div class="name">브라운 S9프로 플러스 (면도기날)</div>
+        <div class="location">📍 거실 화장실</div>
+        <span class="cycle-badge cycle-90">3개월마다 (90일)</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="icon">🧴</div>
+      <div class="info">
+        <div class="name">브라운 S9프로 플러스 (세정액)</div>
+        <div class="location">📍 거실 화장실</div>
+        <span class="cycle-badge cycle-30">2개월마다 (60일)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 앱 입력 안내 -->
+  <div class="memo-box">
+    <strong>📱 까먹지마 앱 입력 순서</strong>
+    ① + 버튼 → 항목 이름 입력<br>
+    ② 반복 주기 설정 (일 단위)<br>
+    ③ 시작일 = 마지막 교체일로 설정<br>
+    ④ 저장 후 알림 권한 허용
+  </div>
+
+</body>
+</html>
